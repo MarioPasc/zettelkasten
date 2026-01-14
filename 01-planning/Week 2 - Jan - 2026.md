@@ -2,7 +2,7 @@
 - [ ] Buy train tickets to see vivi
 - [ ] [jsddpm](jsddpm-project) : Generate KID and Dice segmentation plots 
 - [ ] MedSyn: Generate final plots and start readcting
-- [ ] Sport: Push Day
+- [x] Sport: Push Day
 - [ ] Sport: Pull Day
 - [ ] Sport: Leg Day
 - [ ] Buy sunrise alarm from amazon
