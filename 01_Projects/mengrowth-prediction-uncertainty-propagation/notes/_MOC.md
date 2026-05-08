@@ -16,6 +16,11 @@ literature notes.*
 
 <!-- Auto-managed by the moc-update skill. -->
 
+- [[propagation-budget-identity|Propagation budget identity (REML)]] — σ²_n,homo ≈ σ²_n,het + mean(σ²_v); explains marginal-null / conditional-positive split
+- [[lme-predictive-variance|LME predictive variance decomposition]] — full s*² formula; what each implementation actually returns
+- [[interval-score-saturation|Interval Score saturation under monotone rescaling]] — analytic ceiling; information must come from a different ranking
+- [[residual-decomposition-h1-h2|Residual decomposition — H1 vs H2]] — segmentation / Gompertz / biology decomposition; live framing of the candidate-metrics question
+
 ## Parent
 
 - [[../_MOC|MenGrowth Project MOC]]
