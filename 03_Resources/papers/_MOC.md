@@ -14,13 +14,15 @@ captured via the `paper-note` skill. Each topic folder has its own
 
 ## Topic folders
 
+- [[foundation-models/_MOC|Foundation models]] — pretraining, transfer, PEFT
+- [[segmentation/_MOC|Segmentation]] — architectures, losses, benchmarks
+- [[uncertainty/_MOC|Uncertainty]] — epistemic vs aleatoric, deep ensembles, calibration
+
 <!-- Suggested seeds (create on demand via paper-note skill):
 - [[diffusion-models/_MOC|Diffusion models]]
 - [[flow-matching/_MOC|Flow matching]]
 - [[medical-imaging/_MOC|Medical imaging]]
 - [[representation-learning/_MOC|Representation learning]]
-- [[foundation-models/_MOC|Foundation models]]
-- [[segmentation/_MOC|Segmentation]]
 - [[evaluation-metrics/_MOC|Evaluation metrics]]
 -->
 

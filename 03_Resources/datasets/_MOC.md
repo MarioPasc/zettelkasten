@@ -15,6 +15,8 @@ known issues, projects that consume them.*
 
 <!-- Auto-managed by moc-update. -->
 
+- [[mengrowth|MenGrowth]] — UMA longitudinal meningioma cohort (58 patients, ~3 studies/patient, BraTS-style preprocessed, H5)
+
 ## Parent
 
 - [[../_MOC|03 Resources]]

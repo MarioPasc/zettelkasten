@@ -78,6 +78,14 @@ fits. If a domain doesn't exist, add it here first.
 - `#domain/brainsegfounder` — BSF
 - `#domain/maisi`
 
+### Statistical modelling / forecasting
+
+- `#domain/lme` — Linear Mixed-Effects models
+- `#domain/heteroscedastic` — heteroscedastic noise models
+- `#domain/growth-prediction` — volumetric / longitudinal growth forecasting
+- `#domain/tumor-forecasting` — tumour-trajectory prediction
+- `#domain/uncertainty-propagation` — propagation of upstream uncertainty into downstream models
+
 ### Methods / theory
 
 - `#domain/uncertainty`
@@ -92,6 +100,7 @@ fits. If a domain doesn't exist, add it here first.
 - `#project/repa-maisi-3d-mri`
 - `#project/inter-lora-rank-bsf`
 - `#project/meningioma-growth`
+- `#project/mengrowth-prediction-uncertainty-propagation`
 - `#project/slim-diff`
 - *(extend as projects start; mirror the folder slug under `01_Projects/`)*
 

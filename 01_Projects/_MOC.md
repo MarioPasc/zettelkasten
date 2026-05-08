@@ -14,6 +14,7 @@ first (status), then alphabetical by name.*
 
 ## Children
 
+- [[mengrowth-prediction-uncertainty-propagation/_MOC|MenGrowth Prediction · Uncertainty Propagation]] — propagate deep-ensemble (procedural) segmentation uncertainty into a heteroscedastic LME for meningioma growth forecasting
 - [[example-repa-maisi-3d-mri/_MOC|Example — REPA-MAISI 3D MRI]] — example project, replace with real ones
 
 ## Parent
