@@ -1,0 +1,36 @@
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.kate-swp
+desktop.ini
+
+# --- Obsidian per-machine state ---
+# Workspace layout is per-device; keep plugins/themes synced selectively.
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspaces.json
+.obsidian/cache
+.obsidian/graph.json
+.trash/
+
+# If you want a fully fresh per-device .obsidian, swap the lines above for:
+#   .obsidian/*
+#   !.obsidian/snippets/
+#   !.obsidian/themes/
+
+# --- Claude Code session artefacts ---
+.claude/projects/
+.claude/sessions/
+.obsidian-claude-code/
+
+# --- Build / scratch ---
+node_modules/
+*.log
+.tmp/
+
+# --- Sensitive ---
+*.env
+.env.*
+*secrets*
