@@ -15,11 +15,12 @@ LME fits (homoscedastic, heteroscedastic), ablations.*
 
 <!-- Auto-managed by the moc-update skill. -->
 
-- [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|LMEHomo vs LMEHetero — marginal + σ²_v tertile]] — marginal null, conditional textbook propagation
-- [[2026-05-08--sigma-v-stability-vs-m|σ²_v stability vs ensemble size M]] — robust from m≥5; not a sampling artefact
-- [[2026-05-08--synthetic-variance-stresstest|Synthetic variance stress test]] — 16 profile×level cells; ~91% structural, ~9% propagation
-- [[2026-05-08--qc-filter-collapse|QC filter collapses propagation effect]] — half the headline came from segmentation-failure scans
-- [[2026-05-08--smooth-shift-tau-sweep|Smooth-shift α-sweep + τ-scaling]] — IS surface saturates; rules out scaling-only fixes
+- [[2026-05-08--bsf-lora-rank-sweep-segmentation|BSF + LoRA rank sweep — segmentation Dice]] — frozen 0.632 → r=2 0.862 → r=32 0.879; final config r=16; M=20 plateaus at k=10–15
+- [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|LMEHomo vs LMEHetero — main experiment, post-QC null]] — IS@95 8.286 vs 8.287 marginally; tertile cells equivalent
+- [[2026-05-08--qc-filter-collapse|QC filter (SynthSeg q ≥ 0.80) defines post-QC cohort]] — 16 scans / 4 patients drop; main experiment is null on the cleaned cohort
+- [[2026-05-08--smooth-shift-tau-sweep|τ-sweep on post-QC cohort]] — at τ=0 hetero is slightly worse (+0.064 IS@95, 13/20 BH-rejected); large τ saturates trivially
+- [[2026-05-08--sigma-v-stability-vs-m|Ensemble-size convergence]] — performance plateaus k=10–15 across all five LoRA ranks
+- [[2026-05-08--synthetic-variance-stresstest|Synthetic variance stress test (PRE-QC N=56 PILOT, archived)]] — A/B/C/D/E profiles; 17.66 high-tertile from this pilot, not the main experiment
 
 ## Parent
 

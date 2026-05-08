@@ -1,5 +1,5 @@
 ---
-title: "σ²_v stability vs ensemble size M"
+title: "Ensemble-size convergence — performance plateaus between k=10 and k=15"
 created: 2026-05-08
 updated: 2026-05-08
 type: experiment
@@ -8,38 +8,40 @@ tags: [type/experiment, project/mengrowth-prediction-uncertainty-propagation, st
 project: mengrowth-prediction-uncertainty-propagation
 ---
 
-# $\sigma^2_v$ stability vs ensemble size $M$
+# Ensemble-size convergence — performance plateaus between $k=10$ and $k=15$
 
-*Sweep $m{=}2,\dots,20$ random subsets of the LoRA ensemble and check that cohort and per-tertile $\overline{\sigma^2_v}$, plus per-scan MC stability, are not undersampling artefacts. They are not: the choice $M{=}20$ is robust; results from $m{\geq}5$ would be qualitatively unchanged.*
+*BSF + LoRA ensemble performance plateaus between $k=10$ and $k=15$ members across all five LoRA ranks ($r \in \{2, 4, 8, 16, 32\}$). $M=20$ is sufficient without redundancy. The "tolerance from $m \geq 5$" the vault originally quoted does not appear in any thesis section.*
 
-## Source document
+## Source
 
-`UQ_SIGMA_V_VS_M_RESULTS.md`
+`sections/results/segmentation.tex`
 
 ## Setup
 
-- **Universe:** $M=20$ LoRA members trained with seed-only randomisation.
-- **Subset sweep:** for each $m \in \{2,\dots,20\}$, draw $S \in \{200, \dots, 500\}$ random subsets without replacement; compute $\sigma_v^{(m,s)} = \mathrm{SD}_{m \text{ members}}[\log(V^{(m)}+1)]$ for each scan.
-- **Aggregations:** cohort mean $\overline{\sigma^2_v}(m)$, per-tertile means, per-scan MC stability (relative SD across the $S$ subsets at fixed $m$).
+- **Universe.** $M = 20$ LoRA members per rank, seed-only randomisation.
+- **Subset analysis.** For each rank and each $k = 1, \dots, 20$, evaluate Dice / per-region Dice / inter-member variance over random subsets.
+- **Aggregations reported.** Performance vs $k$, consistent across all five LoRA ranks and across data-augmentation seeds.
 
-## Results
+## Result (qualitative — thesis does not typeset a numeric tolerance)
 
-- **Cohort mean.** Converges within $\pm 1\%$ of the $m{=}20$ value from $m \geq 5$.
-- **Per-tertile means.** Flat across the entire $m{=}2,\dots,20$ sweep; no regime where a different $m$ would change the ranking of low / mid / high.
-- **Per-scan MC stability.** $\sigma_v(m)$ has $\leq 20\%$ relative SD by $m \approx 10$.
+- **Plateau between $k=10$ and $k=15$.** Adding members beyond $k \approx 15$ produces no measurable Dice improvement and no measurable change in the inter-member variance estimate.
+- **$M=20$ chosen.** Captures the plateau without redundancy; consistent across all 5 ranks and seeds.
+- **No "$m \geq 5$" claim in the thesis.** The earlier vault entry stated cohort $\overline{\sigma^2_v}$ converges within $\pm 1\%$ from $m \geq 5$. That tolerance is not in `results/segmentation.tex`; it may exist in planning docs but is not typeset and not extractable from the result JSONs.
 
-## Interpretation
+## Implication
 
-The high-tertile conditional gap reported in [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|the homo-vs-hetero experiment]] is **not driven by undersampled segmentation uncertainty.** $M{=}20$ is past the elbow on every aggregation that matters; $M{\geq}10$ would not have changed the qualitative conclusion.
+- The post-QC null finding ([[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|main experiment]]) is not driven by ensemble-size undersampling. With $M=20$ past the plateau, the $\sigma^2_v$ vector represents the asymptotic procedural disagreement of the pipeline.
+- This makes the post-QC null a stronger statement: the channel is information-poor on this cohort even at the pipeline's asymptotic resolution.
 
-## Consequence for downstream questions
+## Open TODO
 
-Anything that fails on this cohort — including the post-QC null and the eventual diagnostic of the candidate-metrics protocol — fails for reasons orthogonal to ensemble-size choice.
+- Cross-check the planning-doc "$\pm 1\%$ from $m \geq 5$" against `cohort_meta.json` and the pre-QC subset-sweep outputs. If reproducible, promote it back into the thesis with a citable number.
 
 ## Related
 
 - [[../_MOC|Project MOC]]
+- [[../coding-sessions/2026-05-08T1900--thesis-results-reconciliation|Reconciliation session]]
 - [[../decisions/0004--ensemble-size-m20|0004 — M=20 ensemble size]]
-- [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|Homo vs hetero marginal + tertile]]
+- [[2026-05-08--bsf-lora-rank-sweep-segmentation|BSF + LoRA rank sweep]]
 
 #type/experiment #project/mengrowth-prediction-uncertainty-propagation #domain/uncertainty

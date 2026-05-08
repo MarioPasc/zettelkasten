@@ -12,6 +12,9 @@ project: mengrowth-prediction-uncertainty-propagation
 
 *REML, given a fixed total residual likelihood, splits the noise budget between the LME residual variance $\sigma_n^2$ and the per-scan injected variance $\sigma^2_{v,ij}$. Approximately:* $\hat\sigma^2_{n,\text{homo}} \approx \hat\sigma^2_{n,\text{het}} + \overline{\sigma^2_v}$.
 
+> [!warning]
+> The numerical instance ($0.95 \approx 0.55 + 0.40$) and the marginal-null framing in this note were derived from the **pre-QC N=56 pilot epoch**, not the post-QC N=54 main experiment. In the post-QC main experiment, $\sigma^2_v$ is floored at 0.001 with $q_{66}{=}0.004$ and the budget identity is empirically degenerate: $\overline{\sigma^2_v}_\text{post-QC} \approx 0.053$, and the REML residual variances of LMEHomo and LMEHetero match to four significant figures (see [[../experiments/2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|main experiment]]). The identity below is conceptually correct as a leading-order REML decomposition; treat the specific numbers as illustrative of the pilot epoch only, and verify against the post-QC `*_baseline` REML estimates before citing in the thesis.
+
 ## Statement
 
 Let $\hat\sigma^2_{n,\text{homo}}$ be the REML estimate of the residual variance under the homoscedastic LME

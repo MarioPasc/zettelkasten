@@ -1,5 +1,5 @@
 ---
-title: "QC filter (max_logvol_std=1.0) collapses propagation effect to non-significance"
+title: "QC filter (SynthSeg q ≥ 0.80) defines the post-QC cohort; main experiment is null"
 created: 2026-05-08
 updated: 2026-05-08
 type: experiment
@@ -8,45 +8,55 @@ tags: [type/experiment, project/mengrowth-prediction-uncertainty-propagation, st
 project: mengrowth-prediction-uncertainty-propagation
 ---
 
-# QC filter (`max_logvol_std=1.0`) collapses propagation effect to non-significance
+# QC filter (SynthSeg $q \geq 0.80$) defines the post-QC cohort; main experiment is null
 
-*Removing 11 segmentation-failure scans halves the headline high-tertile gain and brings $\Delta\mathrm{IS}@95$ to $p{=}0.43$. Half of the pre-QC propagation effect was carried by pipeline failures, not measurement noise.*
+*The thesis QC is a SynthSeg self-consistency floor at $q{=}0.80$, not the `max_logvol_std=1.0` filter the planning docs sketch. Sixteen scans (4 patients) drop, leaving 54 patients / 163 scans. On this cohort LMEHomo ≡ LMEHetero at every level — the propagation effect does not exist post-QC, it is not "weakened" or "non-significant".*
 
-## Source document
+## Source files
 
-`EXPERIMENT.md`
+- `sections/results/preprocessing.tex` — typeset QC criterion, threshold, dropped scans, spacing regression.
+- `main_experiment/cohort_meta.json` — $n_{\text{patients}}=54$, $n_{\text{scans}}=163$.
+- `main_experiment/{LME,LMEHetero_Zero}_baseline/marginal_metrics.json` and `tertile_metrics.json`.
 
-## Setup
+## Filter
 
-- **Filter.** `max_logvol_std = 1.0` on the per-scan $\sigma_v = \mathrm{SD}_m[\log(V^{(m)}+1)]$ vector.
-- **Drops 11/179 scans.** Inspection: 3 zero-volume targets (members disagree on whether to predict any mask), sub-cm³ tumours where mask presence is binary across the ensemble, FOV-edge cases.
-- **Cohort.** Pre-QC: 56 patients, 179 scans. Post-QC: 54 patients, 163 scans. The 11 drops concentrate in 2 patients with otherwise valid trajectories.
-- **Statistical test.** Paired BCa bootstrap on $\Delta$ metrics in the high-tertile cell.
+- **Metric.** SynthSeg self-consistency score $q$ (per-study automated MR-segmentation reliability).
+- **Threshold.** $q \geq 0.80$. Authors' reliability floor.
+- **Pass rate.** 170 / 179 studies (95.0%) at or above threshold.
+- **Below $q{=}0.75$.** 5 studies; 4 of them belong to MenGrowth-0007 and MenGrowth-0025.
+- **Cohort minimum.** $q = 0.547$ on MenGrowth-0007-000 (T1n slice spacing 7 mm, large convexity meningioma).
+- **Spacing regression.** $\hat\beta_1 = -0.007$ ($\mathrm{SE}=0.001$, $p<0.001$); $\hat\sigma^2_u = 0.001$.
+- **Deep-grey-matter acceptance.** Observed median CV = 0.029 (threshold 0.05); all 6 DGM structures pass individually.
 
-## Results — high-tertile contrasts
+## Effect on cohort
 
-| Contrast | $\Delta\mathrm{IS}@95$ | $p$ | $\Delta\mathrm{cov}_{95}$ | $p$ |
-|---|---:|---:|---:|---:|
-| LME → LMEHetero (no QC, $n{=}19$) | $-7.84$ | 0.22 | $+0.105$ | 0.25 |
-| LME → LMEHetero (with QC, $n{=}17$) | $-3.28$ | 0.43 | $+0.118$ | 0.25 |
+| | Patients | Scans |
+|---|---:|---:|
+| Preprocessing set | 58 | 179 |
+| Post-QC growth-model cohort | 54 | 163 |
+| **Drops** | **4** | **16** |
 
-## Interpretation
+(Vault previously stated "11 scans, 2 patients" — paraphrased from a planning-doc max_logvol_std filter, not the SynthSeg-QC the thesis applies.)
 
-- **Half the headline came from failures.** $-7.84 \to -3.28$ is a 58% reduction in the IS@95 effect.
-- **Post-QC effect is not statistically significant** at any conventional threshold. The clean-cohort $\sigma^2_v$ distribution does not have enough dispersion to exercise the propagation mechanism at $N{=}54$.
-- **The QC filter is a methodological correction, not a results-massaging step.** The 11 dropped scans are pipeline failures; reporting only the pre-QC headline would attribute to measurement noise an effect that is partly a consequence of the segmenter occasionally failing to detect the tumour.
+## Effect on growth-prediction calibration
 
-## Consequence for the thesis chapter
+The vault originally framed this experiment as "QC collapses the propagation effect from $p{=}0.22$ to $p{=}0.43$". The thesis main-experiment numbers do not support that framing. Post-QC, **LMEHomo and LMEHetero are equivalent at four significant figures both marginally and at every tertile** ([[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|main experiment]]). There is no effect to "collapse"; the cleaned cohort simply has a $\sigma^2_v$ distribution dominated by the floor at 0.001 ($q_{66}=0.004$), which leaves no dispersion for hetero to redistribute.
 
-- Both pre- and post-QC results must be reported.
-- The sensitivity analysis sweeping the QC threshold $\{0.5, 0.75, 1.0, 1.25, 1.5\}$ is a TODO ([[../decisions/0003--qc-threshold-max-logvol-std|0003]]); without it the threshold is a free hyperparameter.
-- This experiment is the strongest argument that, on this cohort, the propagation mechanism cannot rescue the chapter on its own — only a more informative summary (candidate-metrics) or a larger / dispersively richer cohort could.
+## On the `max_logvol_std=1.0` filter
+
+The earlier vault entries described `max_logvol_std=1.0`, which would drop the segmentation-failure tail of the LoRA-ensemble $\sigma_v$ distribution. That filter exists in planning docs (UQ_PRED) but is **not** the QC the thesis applies to define the main-experiment cohort. The two filters could co-exist (SynthSeg upstream, ensemble-stddev-cap downstream); the thesis as currently typeset only documents the SynthSeg one. See [[../decisions/0003--qc-threshold-max-logvol-std|0003]].
+
+## Implication
+
+- The post-QC main-experiment null is the **headline** finding for the propagation chapter.
+- Pre-QC pilot effects (high-tertile IS@95 17.66 → ~9.82) belong to a different cohort and a different pipeline state; report them as pilot results only, not as the main result.
+- Sensitivity to the QC threshold is still worth a sweep (e.g. $q \in \{0.70, 0.75, 0.80, 0.85, 0.90\}$ for SynthSeg), but the candidate-metrics diagnostic is the higher-leverage next step.
 
 ## Related
 
 - [[../_MOC|Project MOC]]
+- [[../coding-sessions/2026-05-08T1900--thesis-results-reconciliation|Reconciliation session]]
 - [[../decisions/0003--qc-threshold-max-logvol-std|0003 — QC threshold]]
-- [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|Pre-QC homo-vs-hetero result]]
-- [[../decisions/0006--candidate-metrics-staged-diagnostic|0006 — candidate-metrics protocol]]
+- [[2026-05-08--lme-homo-vs-hetero-marginal-and-tertile|Main experiment — homo vs hetero]]
 
 #type/experiment #project/mengrowth-prediction-uncertainty-propagation #domain/uncertainty-propagation

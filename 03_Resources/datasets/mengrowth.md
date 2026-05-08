@@ -15,12 +15,14 @@ sources: []
 
 ## Summary
 
-- **Patients:** 58
-- **Mean studies per patient:** 3 (longitudinal)
-- **Preprocessing:** BraTS-style (skull-strip, co-registration to common atlas, intensity normalisation, resampling to 1 mm³)
-- **Format:** HDF5 (one file per study or per patient — confirm in session log when first opened)
-- **Storage path:** `/media/mpascual/MeningD2/MENINGIOMAS/MENGROWTH/050526/h5_format`
-- **Provenance:** UMA / Hospital de Málaga collaboration (local longitudinal cohort)
+- **Patients (preprocessing set):** 58.
+- **Scans (preprocessing set):** 179 (2–6 timepoints/patient).
+- **Patients (post-SynthSeg-QC growth-model cohort):** 54.
+- **Scans (post-QC):** 163. Drops: 16 scans / 4 patients (`q < 0.80` on SynthSeg self-consistency); cohort minimum $q = 0.547$ on MenGrowth-0007-000.
+- **Preprocessing:** BraTS-style (skull-strip, co-registration to common atlas, intensity normalisation, resampling to 1 mm³).
+- **Format:** HDF5.
+- **Storage path:** `/media/mpascual/MeningD2/MENINGIOMAS/MENGROWTH/050526/h5_format`.
+- **Provenance:** UMA / Hospital de Málaga collaboration (local longitudinal cohort).
 
 ## Use in projects
 

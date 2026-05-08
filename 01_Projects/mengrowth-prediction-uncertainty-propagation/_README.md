@@ -49,26 +49,27 @@ sharper, well-calibrated 1-year-ahead volume forecasts.
 
 ## Status
 
-- **Phase:** Stage 1 propagation arc closed pending candidate-metrics diagnostic. Marginal LMEHetero null; pre-QC high-tertile gain ($\Delta\mathrm{IS}{=}-7.84$) collapses post-QC to non-significance ($\Delta\mathrm{IS}{=}-3.28$, $p{=}0.43$). ~91% of pre-QC gap is the FE-variance fix, ~9% genuine $\sigma^2_v$ propagation. Live question: does **any** scalar from the LoRA ensemble correlate with trajectory residuals on this cohort?
-- **Last session:** [[coding-sessions/2026-05-08T1500--uq-propagation-stage1-synthesis|2026-05-08 — Stage 1 synthesis]]
-- **Blockers:** Stage 1 of candidate-metrics diagnostic blocked on wiring candidate vectors into the loader (`spearman_results.json` currently all-NaN, plumbing-only).
+- **Phase:** Post-QC main experiment is **null at every level** — LMEHomo and LMEHetero match to 4 significant figures both marginally (IS@95 8.2857 vs 8.2866, cov 0.9074) and at every $\sigma^2_v$ tertile. The dramatic high-tertile recovery (IS@95 17.66 → ~9.82) belongs to a separate pre-QC N=56 pilot, not the main experiment. At $\tau=0$ on the post-QC cohort, hetero is slightly *worse* than homo (mean $\Delta$IS $=+0.064$, 13/20 seeds BH-reject). Stage 3 chapters of the thesis (`growth.tex`, `discussion.tex`, `conclusion.tex`) are TODO. Live question: does any candidate scalar from the LoRA ensemble correlate with trajectory residuals?
+- **Last session:** [[coding-sessions/2026-05-08T1900--thesis-results-reconciliation|2026-05-08 — Thesis results reconciliation]]
+- **Blockers:** Stage 1 of candidate-metrics diagnostic blocked on wiring candidate vectors into the loader (`test_candidate_uncertainty_signals` directory does not exist on disk; Stage 1 is planned but not yet executed).
 
 ## Roadmap
 
 | Phase                                    | Goal                                                                                                                              | Target date | Status         |
 |------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|-------------|----------------|
-| Cohort + preprocessing                   | MenGrowth (58 pts, BraTS-style, longitudinal) curated and H5-packed                                                               | 2026-04-30  | done           |
-| BSF + LoRA segmentation                  | Train BSF + LoRA (stages 1–4, kqv+proj+fc1+fc2, frozen decoder); extract per-study                                                | 2026-05-15  | done           |
-| Deep-ensemble uncertainty ($M{=}20$)     | Procedural variance per scan; robustness-on-$M$ verified                                                                          | 2026-05-15  | done           |
+| Cohort + preprocessing                   | MenGrowth (58 pts, 179 scans, BraTS-style, longitudinal) curated and H5-packed                                                    | 2026-04-30  | done           |
+| BSF + LoRA segmentation rank sweep       | $r \in \{2,4,8,16,32\}$, $\alpha=2r$, frozen decoder; final r=16, Dice 0.874; r=32 best at 0.879                                 | 2026-05-01  | done           |
+| Deep-ensemble uncertainty ($M{=}20$)     | Procedural variance per scan; plateau at $k{=}10{-}15$                                                                            | 2026-05-01  | done           |
+| SynthSeg QC ($q \geq 0.80$)              | Define growth-model cohort: 16 scans / 4 patients drop → 54 patients / 163 scans                                                  | 2026-05-02  | done           |
 | LME predictive-variance fix              | Include FE term $\mathbf{x}^{*\top}\widehat{\mathrm{Cov}}(\hat\beta)\mathbf{x}^*$ in `lme_model.py` / `lme_hetero.py`              | 2026-05-05  | done           |
-| LMEHomo vs LMEHetero — marginal + tertile| Marginal null; pre-QC high-tertile recovery (IS@95 17.66→9.82, cov 0.789→0.895)                                                  | 2026-05-05  | done           |
-| Synthetic variance stress test           | 16 profile×level cells, 10 seeds: ~91% structural / ~9% propagation                                                              | 2026-05-06  | done           |
-| QC filter (`max_logvol_std=1.0`)         | Drops 11 segmentation-failure scans → post-QC effect collapses to $p{=}0.43$                                                      | 2026-05-07  | done           |
-| Smooth-shift α-sweep + τ-scaling         | Confirm IS surface saturates under monotone rescaling; rules out scaling-only fixes                                               | 2026-05-07  | done           |
-| Candidate-metrics Stage 1 (rank-corr)    | Spearman/Pearson/Kendall + 95% BCa CI vs $\lvert y_*-\hat\mu_*^{\text{homo}}\rvert$ for each candidate; pass at $\lvert\hat\rho\rvert{>}0.20$ | 2026-05-15  | active         |
+| LMEHomo vs LMEHetero (post-QC main)      | **Null at every level** (IS@95 8.286 vs 8.287, cov 0.9074 both; tertile cells indistinguishable)                                  | 2026-05-05  | done           |
+| τ-sweep on the post-QC cohort            | At $\tau{=}0$, mean $\Delta$IS $=+0.064$, 13/20 BH-rejected (hetero slightly worse); large $\tau$ saturates trivially            | 2026-05-07  | done           |
+| Pre-QC pilot (synthetic stress test)     | N=56 pilot only: A/B/C/D/E profiles, high-tertile pilot dynamics. Archived; main result is the post-QC null                       | 2026-04-25  | archived       |
+| Candidate-metrics Stage 1 (rank-corr)    | Spearman/Pearson/Kendall + 95% BCa CI vs $\lvert y_*-\hat\mu_*^{\text{homo}}\rvert$ for each candidate; pass at $\lvert\hat\rho\rvert{>}0.20$ | 2026-05-15  | active (blocked) |
 | Candidate-metrics Stage 2 (LME-hetero)   | Per-(candidate, scaling) LOPO-LMEHetero, paired BCa $\Delta\mathrm{IS}@95$, BH-FDR; only Stage-1 passers                          | 2026-05-22  | not started    |
 | Frozen-decoder ablation                  | Decoder-frozen vs trainable, with/without LoRA on encoder                                                                         | 2026-06-15  | not started    |
-| Bachelor thesis writing                  | Write-up in Overleaf project `68596a200c0e0e3876880afa`                                                                           | 2026-06-30  | active         |
+| Stage 3 thesis sections                  | Write `results/growth.tex`, `discussion/*.tex`, `conclusion/*.tex` (currently `TODO`)                                             | 2026-06-15  | not started    |
+| Bachelor thesis final write-up           | Overleaf project `68596a200c0e0e3876880afa`                                                                                       | 2026-06-30  | active         |
 
 ## Method sketch
 
@@ -96,12 +97,14 @@ Identifiability of $(\sigma_\varepsilon^2, \alpha)$ is the open question.
 
 ## Open questions
 
-- **(Live, blocking)** Does any scalar from the LoRA $M{=}20$ ensemble correlate with $\lvert y_* - \hat\mu_*^{\text{homo}}\rvert$ on this cohort? Candidate set (logvol-MAD, $\mathrm{CV}^2$, mean predictive entropy, BALD/MI, voxel-wise variance, MEN-restricted entropy/MI, MEN-boundary entropy/MI, composite). See [[decisions/0006--candidate-metrics-staged-diagnostic|0006]].
+- **(Live, blocking)** Does any candidate scalar from the LoRA $M{=}20$ ensemble correlate with $\lvert y_* - \hat\mu_*^{\text{homo}}\rvert$ on the post-QC cohort? Candidate set (logvol-MAD, $\mathrm{CV}^2$, mean predictive entropy, BALD/MI, voxel-wise variance, MEN-restricted entropy/MI, MEN-boundary entropy/MI, composite). Stage 1 blocked: `test_candidate_uncertainty_signals` directory absent. See [[decisions/0006--candidate-metrics-staged-diagnostic|0006]].
+- Why is the post-QC $\sigma^2_v$ floored at 0.001 ($q_{66}{=}0.004$)? The floor compresses the high-tertile dispersion that drove the pre-QC pilot's effect and is a major contributor to the post-QC null. Is the floor a software default or a deliberate choice?
+- Are pre-QC and post-QC $\sigma^2_v$ different distributions, or is the post-QC distribution simply the unfloored pre-QC distribution with a floor applied? Affects whether the pre-QC pilot's high-tertile finding survives a re-run on the SynthSeg-QC cohort.
+- Does the τ=0 +0.064 IS@95 deficit and 13/20 BH-rejection of hetero argue *positively* for H2 (anti-informative segmentation channel) rather than just non-informative?
 - Is the headline metric IS@95, CRPS, or coverage at fixed nominal levels? Currently implicit; should be filed as a decision.
 - Should the random-slope structure $(b_{1,p})$ be removed for patients with $<3$ studies?
-- Are $\delta_{\text{Gompertz}}$ and $\eta_{\text{biology}}$ (the non-segmentation residual sources from [[notes/residual-decomposition-h1-h2|the residual decomposition]]) orthogonal to the segmentation channel, or partly correlated? Affects how to interpret a Stage-1 reject.
-- Frozen-decoder vs trainable-decoder ablation: does decoder freezing bottleneck performance and bias ensemble diversity? See [[decisions/0001--frozen-decoder-bsf-lora|0001]].
-- QC threshold sensitivity: sweep $\{0.5, 0.75, 1.0, 1.25, 1.5\}$ for `max_logvol_std`. See [[decisions/0003--qc-threshold-max-logvol-std|0003]].
+- Frozen-decoder vs trainable-decoder ablation: does decoder freezing bottleneck performance and bias ensemble diversity? Reinforced by the LoRA-rank-sweep finding that inter-member variance is non-monotonic and plateaus past r=8. See [[decisions/0001--frozen-decoder-bsf-lora|0001]] and [[experiments/2026-05-08--bsf-lora-rank-sweep-segmentation|rank sweep]].
+- QC threshold sensitivity: sweep SynthSeg $q \in \{0.70, 0.75, 0.80, 0.85, 0.90\}$ to characterise the cohort-size vs reliability trade-off. See [[decisions/0003--qc-threshold-max-logvol-std|0003]].
 - Does delta-method log-volume variance systematically underestimate true variance for $V \to 0$? The $\log(V+1)$ shift mitigates but does not eliminate.
 
 ## Related

@@ -36,6 +36,16 @@ H2 says: at this cohort scale ($N{=}54$ patients, $N{=}163$ post-QC scans), $\de
 
 If H2 is true: Stage 1 of the candidate-metrics diagnostic rejects every candidate (incl. boundary BALD, MEN-restricted entropy, the composite) and the negative controls (`zero`, `constant_mean`, `permuted`) behave as expected. The chapter terminates as a defended negative result.
 
+### Independent post-QC evidence already consistent with H2
+
+After the [[../coding-sessions/2026-05-08T1900--thesis-results-reconciliation|reconciliation against the thesis]], the post-QC main experiment is null at every level:
+
+- LMEHomo and LMEHetero marginal IS@95 $= 8.2857$ vs $8.2866$, identical to 4 s.f. (`main_experiment/*/marginal_metrics.json`).
+- Tertile-stratified high-tertile cell ($n=17$): IS@95 $= 8.242$ for both; cov_95 $= 0.941$ for both. No redistribution.
+- $\tau$-sweep at $\tau = 0$: mean $\Delta\mathrm{IS} = +0.064$ (hetero slightly worse), 13/20 BH-rejected. The empirical $\sigma^2_v$ does not just *fail* to help — it slightly *hurts*. ([[../experiments/2026-05-08--smooth-shift-tau-sweep|τ-sweep]]).
+
+The candidate-metrics Stage 1 has not been run yet; it could still keep H1 alive (a *different* scalar from the same ensemble could be informative). But the prior weight on H2 has shifted up: the simplest scalar derived from the LoRA ensemble is anti-informative on the post-QC cohort, not just non-informative.
+
 ## Why this is publishable either way
 
 - **H1 outcome.** "We identified the right summary of segmentation uncertainty for propagation; downstream IS@95 improves by $\Delta$ on the high-tertile cell."
