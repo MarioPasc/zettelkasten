@@ -1,233 +1,314 @@
-# CLAUDE.md — Knowledge Vault Agent
+# CLAUDE.md — Vault Operating Manual
 
-## Identity
+This file is the contract between Mario and any Claude agent (Claude Code,
+Claude in browser, sub-agents) writing into this vault. **Read it in full
+at the start of every session.** Treat its rules as hard constraints.
 
-You are a knowledge assistant operating inside an Obsidian vault that serves as
-a general-purpose Zettelkasten. The vault owner is a researcher, but this vault
-is not limited to any single domain — it stores anything the owner finds
-intellectually interesting, from machine learning to history to pure
-mathematics. Your role is to **scaffold, link, review, and surface** — never to
-replace the intellectual work of writing.
+The vault is an Obsidian + Git knowledge base for biomedical AI research:
+generative models for medical imaging, foundation-model adaptation, and
+related work. It is the persistent memory layer across coding sessions,
+papers, and ideas.
 
-## Vault Structure
-
-```
-.
-├── 00-inbox/              # Unprocessed captures, fleeting thoughts
-├── 01-sources/            # One note per source (paper, book, talk, article, video)
-├── 02-notes/              # Atomic concept notes (Zettelkasten slips)
-├── 03-projects/           # Living project documents (thesis, papers, grants, side projects)
-├── 04-journal/
-│   ├── weekly/            # Weekly logs (YYYY-Www.md)
-│   └── monthly/           # Monthly reviews (YYYY-MM.md)
-├── 05-moc/                # Maps of Content (emergent topic indices)
-├── 06-templates/          # Note templates (do NOT modify)
-├── assets/                # Images, PDFs, figures, any binary files
-├── .claude/
-│   └── commands/          # Slash commands (agent workflows)
-└── CLAUDE.md              # This file
-```
-
-### Design principles
-
-- **Folders encode note type, not topic.** A note about group theory and a note
-  about sourdough both live in `02-notes/`. Topics are expressed through tags.
-- **Tags are flat and extensible.** There is no fixed tag hierarchy. New tags
-  are created freely as needed. The only structural tags are the type markers:
-  `#source`, `#note`, `#project`, `#weekly`, `#monthly`, `#moc`, `#inbox`.
-- **MOCs are emergent.** A Map of Content is created when a topic cluster has
-  enough density (roughly 5+ notes) to justify a curated index. MOCs are not
-  planned in advance — they crystallise from the tag landscape.
-- **Links over hierarchy.** The primary organisational mechanism is
-  `[[wikilinks]]` between notes, not folder paths. Any note can link to any
-  other note regardless of type.
-
-## Frontmatter Conventions
-
-### Source notes (`01-sources/`)
-```yaml
 ---
-title: "<source title>"
-authors: ["<Last, First>"]       # or creator / speaker / channel
-year: YYYY
-type: paper | book | article | talk | video | podcast | webpage | thesis
-venue: "<journal, publisher, website, conference>"
-url: "<DOI, URL, or ISBN>"
-tags: [source, <topic-tags>]
-status: unread | reading | processed
-citekey: "<optional BibTeX key>"
-created: YYYY-MM-DD
----
-```
 
-### Notes (`02-notes/`)
-```yaml
----
-title: "<one declarative sentence — the core claim>"
-tags: [note, <topic-tags>]
-sources: ["[[source or note links]]"]
-created: YYYY-MM-DD
----
-```
+## 0 · Hard rules (do these every session)
 
-### Project notes (`03-projects/`)
-```yaml
----
-title: "<project name>"
-status: active | paused | completed | abandoned
-tags: [project, <topic-tags>]
-created: YYYY-MM-DD
----
-```
+### 0.1 Git lifecycle (mandatory)
 
-### Weekly notes (`04-journal/weekly/`)
-```yaml
----
-week: "YYYY-Www"
-date_start: YYYY-MM-DD
-date_end: YYYY-MM-DD
-tags: [weekly]
----
-```
-
-### Monthly reviews (`04-journal/monthly/`)
-```yaml
----
-month: "YYYY-MM"
-tags: [monthly]
-created: YYYY-MM-DD
----
-```
-
-### Maps of Content (`05-moc/`)
-```yaml
----
-title: "MOC — <topic>"
-tags: [moc, <topic-tags>]
-created: YYYY-MM-DD
-updated: YYYY-MM-DD
----
-```
-
-## Tagging Guidelines
-
-Tags represent **topics, domains, and methods** — not note types (those are
-already encoded in frontmatter and folder). Tags should be:
-
-- **Lowercase, hyphenated**: `#flow-matching`, `#group-theory`, `#meningioma`
-- **As specific as useful, no more**: prefer `#variational-inference` over
-  `#bayesian` if the note is specifically about VI; use both if both apply.
-- **Freely created**: do not ask permission to introduce a new tag. If a concept
-  has no tag yet, create one.
-- **Not nested**: Obsidian supports `#parent/child` tags, but we avoid them.
-  Use flat tags and let MOCs provide the hierarchical view.
-
-### Current tag landscape (non-exhaustive, grows organically)
-
-These are tags that already exist or are expected. The agent should use these
-when applicable but may introduce new ones at any time.
-
-**AI / ML**: `#deep-learning`, `#generative-models`, `#diffusion`,
-`#flow-matching`, `#vaes`, `#gans`, `#representation-learning`,
-`#equivariance`, `#disentanglement`, `#symbolic-regression`,
-`#foundation-models`, `#fine-tuning`, `#evaluation-metrics`,
-`#explainability`, `#transformers`, `#graph-neural-networks`
-
-**Medical / Bio**: `#neuroimaging`, `#mri`, `#segmentation`, `#meningioma`,
-`#brats`, `#medical-imaging`, `#bioinformatics`, `#genomics`,
-`#clinical-data`, `#longitudinal-studies`
-
-**Mathematics**: `#group-theory`, `#topology`, `#measure-theory`,
-`#differential-geometry`, `#linear-algebra`, `#probability`,
-`#statistics`, `#optimisation`, `#functional-analysis`,
-`#information-theory`, `#category-theory`
-
-**Computing**: `#hpc`, `#slurm`, `#containers`, `#python`, `#latex`,
-`#git`, `#software-engineering`, `#data-pipelines`
-
-**Research practice**: `#methodology`, `#writing`, `#peer-review`,
-`#career`, `#phd-planning`, `#funding`
-
-**Other interests**: `#history`, `#philosophy`, `#travel`, `#astronomy`,
-`#linguistics`, `#economics`, `#music`, `#cooking`
-... (extend as needed)
-
-## Operating Rules
-
-1. **Never overwrite user-written content.** You may append, suggest edits in
-   a clearly marked section, or create new files. If modifying an existing
-   file, show the diff and ask for confirmation unless the command explicitly
-   requests automatic operation.
-
-2. **Atomic notes are sacred.** Each note in `02-notes/` must express exactly
-   one idea. If a proposed note contains two ideas, split it and link them.
-
-3. **Link aggressively.** When creating or editing notes, scan the vault for
-   existing `[[wikilinks]]` targets. Prefer linking to existing notes over
-   creating duplicates. A good note has 3–5 outgoing links.
-
-4. **Tag honestly.** Apply all relevant topic tags to every note. Over-tagging
-   is better than under-tagging — tags are cheap, missed connections are
-   expensive.
-
-5. **Use frontmatter strictly.** Every note must have valid YAML frontmatter
-   matching the conventions above.
-
-6. **Git discipline.** After any batch operation, stage and commit with a
-   descriptive message following conventional commits:
-   `docs(sources): add Smith2024 on flow matching`,
-   `feat(weekly): scaffold 2026-W13`,
-   `refactor(links): connect notes around equivariance`.
-
-7. **Respect the templates.** `06-templates/` contains canonical templates.
-   Always use them as the starting point for new notes.
-
-8. **Domain-agnostic linking.** The best connections are often cross-domain.
-   If a note about Renaissance cartography is conceptually related to a note
-   about latent space geometry, link them and explain why.
-
-9. **Scientific rigour when applicable.** When summarising technical sources
-   or suggesting connections between formal concepts, be precise. Cite
-   specific claims, equations, or results.
-
-10. **Markdown only.** No HTML. Use standard Obsidian-flavoured Markdown:
-    `[[wikilinks]]`, `#tags`, `> [!callout]` blocks, `$$LaTeX$$`.
-
-## Useful Commands
+At the **start** of any writing session:
 
 ```bash
-# Quick vault stats
-find 02-notes/ -name "*.md" | wc -l          # total notes
-find 01-sources/ -name "*.md" | wc -l        # total sources
-
-# Find notes by tag
-grep -rl "#flow-matching" 01-sources/ 02-notes/
-
-# Find orphan notes (no incoming links)
-# Compare all note filenames against all wikilink targets in the vault
-
-# Recent changes
-git diff --name-only HEAD~1
-git log --oneline -10
-
-# All tags in use
-grep -roh '#[a-z][a-z0-9-]*' 01-sources/ 02-notes/ | sort -u
+cd <vault-root>
+git fetch origin
+git pull --rebase origin main          # fail loudly on conflicts; never auto-resolve silently
 ```
 
-## Context About the Vault Owner
+At the **end** of any writing session that produced changes:
 
-**Professional**: Final-year Health Engineering (Bioinformatics) student at
-Universidad de Málaga. Active researcher in biomedical imaging under Prof.
-Ezequiel López-Rubio. Published in Q1 journals. Targeting a PhD in
-biomedical AI.
+```bash
+git status
+git add -A
+git commit -m "<conventional-commit-message>"   # see § 0.2
+git push origin main
+```
 
-**Research threads**: generative modelling for neuroimaging, symbolic
-regression search spaces, VAE latent space equivariance, foundation model
-adaptation for rare pathologies, 3D perceptual metrics for MRI.
+If a `git pull --rebase` reports conflicts, **stop and surface them to
+Mario**. Do not attempt to merge silently. Conflicts in MOC files are
+common and need human judgement.
 
-**Broader interests**: mathematical foundations of ML, history, astronomy,
-travel, philosophy of science — anything intellectually stimulating.
+### 0.2 Commit message convention
 
-**Target**: build a personal knowledge base that compounds over years, not
-just through the PhD, making connections that no single-domain specialist
-would make.
+Use Conventional Commits, scoped to the area touched:
+
+```
+<type>(<scope>): <subject>
+
+<body — optional, ≤72 chars per line>
+```
+
+Allowed `<type>`: `add`, `update`, `refactor`, `fix`, `archive`, `meta`.
+`<scope>` is the top-level folder (`projects/<slug>`, `papers`, `concepts`,
+`meta`, `inbox`, `areas`, …).
+
+Examples:
+
+```
+add(projects/repa-maisi): coding session 2026-05-08T1430 on VAE feasibility
+update(papers/diffusion): refine REPA notes after second read
+meta(templates): tighten paper-note frontmatter
+```
+
+### 0.3 No silent overwrites
+
+If you intend to modify an existing note, **read it first** and preserve
+human-authored sections unless explicitly told to rewrite. When uncertain,
+append a new dated section rather than mutating prose.
+
+### 0.4 Atomicity
+
+One idea = one note. If a note grows past ≈400 words on a second concept,
+split it. Atomic notes are linkable; monoliths are not.
+
+---
+
+## 1 · Folder architecture
+
+```
+zettlekasten/
+├── CLAUDE.md                 ← you are here
+├── README.md                 ← human-facing entry point
+├── 99_Index.md               ← top-level Map of Content (linked in graph hub)
+├── 00_Inbox/                 ← unprocessed quick captures (TTL: days)
+├── 01_Projects/              ← active research / code projects (TTL: weeks-months)
+│   └── <project-slug>/
+│       ├── _MOC.md           ← project Map of Content
+│       ├── _README.md        ← project context, goals, status, stack
+│       ├── data/             ← per-dataset notes (formats, splits, rationale)
+│       ├── coding-sessions/  ← timestamped session logs (one .md per session)
+│       ├── decisions/        ← architecture / design decisions (ADR-style)
+│       ├── experiments/      ← run logs, hyperparams, results
+│       └── notes/            ← misc working notes for this project
+├── 02_Areas/                 ← ongoing responsibilities (TTL: years)
+│   ├── phd-applications/
+│   ├── teaching-and-mentoring/
+│   ├── reviewer-duties/
+│   └── conferences-and-talks/
+├── 03_Resources/             ← reference / Zettelkasten zone (TTL: permanent)
+│   ├── papers/<topic>/       ← literature notes, one per paper
+│   ├── concepts/             ← atomic Zettel notes (single idea, densely linked)
+│   ├── books/
+│   ├── datasets/
+│   └── tools-and-software/
+├── 04_Archive/               ← finished or abandoned items (mirrors source structure)
+├── 05_Attachments/           ← images, PDFs, figures (referenced from notes)
+└── 06_Meta/
+    ├── conventions.md        ← style guide (filenames, frontmatter, links)
+    ├── tag-taxonomy.md       ← canonical list of valid tags
+    └── templates/            ← templates inserted by skills and Templater
+```
+
+Numeric prefixes (`00_`, `01_`, …) are **immutable**. They enforce sort
+order across all platforms and are referenced by skills.
+
+### 1.1 Lifecycle and movement
+
+```
+00_Inbox  →  01_Projects  →  04_Archive
+              ↑      ↓
+            02_Areas
+              ↑
+            03_Resources  (linked from Projects/Areas; rarely moved)
+```
+
+When a project is finished or paused, **move** its folder into
+`04_Archive/<YYYY-MM>__<slug>/` and update its `_MOC.md` status to
+`#status/archived`. Do not delete; archive preserves backlinks.
+
+---
+
+## 2 · Note layout (every file)
+
+Every note **must** start with this YAML frontmatter:
+
+```yaml
+---
+title: "<Human-readable title>"
+created: 2026-05-08
+updated: 2026-05-08
+type: <one of: project | session | paper | concept | dataset | decision | experiment | moc | area | inbox | tool | book>
+status: <one of: draft | active | review | done | archived | blocked>
+tags: [type/<type>, status/<status>, domain/<domain>, project/<slug-if-applicable>]
+aliases: []                # optional, for [[wikilink|alias]] resolution
+sources: []                # optional: DOIs, URLs, arXiv IDs
+---
+```
+
+After the frontmatter:
+
+1. `# <title>` (H1, identical to `title` field).
+2. A **one-line summary** (italic), the same one MOC files use.
+3. Body content.
+4. `## Related` section at the bottom with `[[wikilinks]]` to backlinks
+   (other notes, MOCs, parent project).
+5. Inline tags (`#type/paper #domain/diffusion`) on a single line above
+   `## Related` so they show as a tag cluster in graph view.
+
+A note without a frontmatter block, an H1, a one-line summary, an inline
+tag line, and at least one `[[wikilink]]` is **incomplete**. Fix it before
+committing.
+
+---
+
+## 3 · Map of Content (MOC) files
+
+Every folder gets a `_MOC.md`. Underscore prefix forces it to sort to the
+top of the folder. The MOC's job is to give a one-line summary of every
+file in its folder, plus links to child MOCs.
+
+`_MOC.md` skeleton (use the template at `06_Meta/templates/moc.md`):
+
+```markdown
+---
+title: "MOC — <Folder Human Name>"
+type: moc
+updated: 2026-05-08
+tags: [type/moc]
+---
+
+# MOC — <Folder Human Name>
+
+*One-paragraph purpose of this folder.*
+
+## Children
+
+- [[_MOC|<subfolder MOC>]] — <one-line>
+- [[<file-slug>|<File Title>]] — <one-line summary>
+
+## Parent
+
+- [[../_MOC|<Parent folder>]]
+
+#type/moc
+```
+
+**Rule (mandatory):** when a skill or human creates a new note in a
+folder, the same operation **must** add a one-line entry for that note in
+the folder's `_MOC.md`. The `moc-update` skill exists for this; invoke it
+instead of editing MOCs by hand.
+
+---
+
+## 4 · Filename conventions
+
+| Kind                   | Pattern                                        | Example                                          |
+|------------------------|------------------------------------------------|--------------------------------------------------|
+| MOC                    | `_MOC.md`                                      | `01_Projects/repa-maisi-3d-mri/_MOC.md`          |
+| Project README         | `_README.md`                                   | `01_Projects/repa-maisi-3d-mri/_README.md`       |
+| Coding session         | `YYYY-MM-DDTHHMM--<kebab-slug>.md`             | `2026-05-08T1430--vae-lesion-recon-feasibility.md` |
+| Decision (ADR-style)   | `NNNN--<kebab-slug>.md`                        | `0007--switch-to-flow-matching.md`               |
+| Experiment             | `YYYY-MM-DD--<kebab-slug>.md`                  | `2026-05-08--ablation-repa-weight.md`            |
+| Paper note             | `<first-author><year>--<kebab-title-slug>.md`  | `ho2020--ddpm.md`                                |
+| Concept (Zettel)       | `<kebab-slug>.md`                              | `flow-matching-objective.md`                     |
+| Dataset                | `<kebab-slug>.md`                              | `brats-gli-2024.md`                              |
+| Inbox capture          | `YYYY-MM-DDTHHMM--<kebab-slug>.md`             | `2026-05-08T0930--idea-rare-finding-prior.md`    |
+
+- All slugs are **lowercase kebab-case**. No spaces, no underscores in
+  filenames except for the `_MOC` / `_README` sentinel prefix.
+- Use ISO 8601 timestamps with `T` separator. `T1430` is 14:30 local;
+  always use 24-h. The timezone is implicit (Europe/Madrid).
+
+---
+
+## 5 · Linking strategy
+
+- **Wikilinks `[[Note Title]]`** are the primary connection. Every note
+  must link to ≥1 other note (its MOC or a related concept). Orphans
+  weaken the graph.
+- Resolve link targets with full file titles. If a target lacks a unique
+  title, use `[[path/to/file|Display Name]]`.
+- A new project must link from `01_Projects/_MOC.md` and from any related
+  `03_Resources/concepts/*.md` and `03_Resources/papers/*.md` it builds
+  on.
+- A new paper note must link from `03_Resources/papers/<topic>/_MOC.md`
+  and from any project that cites it.
+- A new concept Zettel must link from `03_Resources/concepts/_MOC.md` and
+  from at least one other concept (to seed the graph).
+
+---
+
+## 6 · Tagging contract
+
+Tags live in **two** places, both required:
+
+1. **YAML frontmatter** `tags:` field — canonical, parsed by Dataview /
+   plugins / search.
+2. **Inline `#tag` line** above `## Related` — visible to humans, picked
+   up by Obsidian graph view.
+
+Use the **canonical taxonomy** at `06_Meta/tag-taxonomy.md`. Hierarchical
+(nested) tags only — `#type/paper`, `#domain/diffusion-models`,
+`#project/repa-maisi`. Never invent a top-level namespace without adding
+it to the taxonomy file in the same commit.
+
+Mandatory tags per note type:
+
+| Note type   | Required tags                                               |
+|-------------|-------------------------------------------------------------|
+| project     | `type/project`, `status/<x>`, `domain/<x>`                  |
+| session     | `type/session`, `project/<slug>`, `status/done`             |
+| paper       | `type/paper`, `domain/<x>`, `venue/<x>` (if applicable)     |
+| concept     | `type/concept`, `domain/<x>`                                |
+| dataset     | `type/dataset`, `domain/<x>`                                |
+| decision    | `type/decision`, `project/<slug>`                           |
+| experiment  | `type/experiment`, `project/<slug>`, `status/<x>`           |
+| moc         | `type/moc`                                                  |
+
+---
+
+## 7 · Skills you (Claude) should use here
+
+The vault ships these skills under `.claude/skills/`. Prefer them over
+ad-hoc edits — they encode the rules above so you don't have to.
+
+| Skill                | When to invoke                                                                 |
+|----------------------|--------------------------------------------------------------------------------|
+| `vault-sync`         | At the start (pull) and end (commit + push) of every session.                  |
+| `coding-session-log` | After any meaningful coding interaction in a project.                          |
+| `paper-note`         | When the user shares a paper / DOI / arXiv link to capture.                    |
+| `project-init`       | When the user starts a new project. Scaffolds all subfolders and MOCs.         |
+| `moc-update`         | After creating any note. Adds the one-line entry to its folder's `_MOC.md`.    |
+
+If the user describes a task that maps to a skill, invoke that skill
+rather than rolling your own steps.
+
+---
+
+## 8 · What NOT to write into the vault
+
+- **Secrets**: API keys, tokens, hospital identifiers, patient data, raw
+  DICOM headers with PHI. Never. Use placeholders and store secrets
+  outside the vault.
+- **Large binaries**: model weights, training data, datasets. Reference
+  them by path / URL / DOI. The `05_Attachments/` folder is for figures
+  and PDFs only.
+- **Auto-generated logs**: SLURM stdout, raw TensorBoard exports.
+  Summarise into an `experiments/` note and link out.
+- **Speculation as fact**: clearly mark hypotheses with
+  `> [!hypothesis]` callouts (Obsidian admonitions) and tag
+  `#status/draft`.
+
+---
+
+## 9 · Quality gate (before pushing)
+
+A note is ready to commit when **all** of:
+
+- [ ] Frontmatter complete (all required fields).
+- [ ] H1 matches `title`.
+- [ ] One-line italic summary present.
+- [ ] At least one `[[wikilink]]` to another note.
+- [ ] Inline `#tag` line present.
+- [ ] Folder `_MOC.md` updated with this note's one-liner.
+- [ ] Filename matches its type's naming pattern (§ 4).
+
+If any item fails, fix it before `git push`.
