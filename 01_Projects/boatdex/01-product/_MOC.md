@@ -32,18 +32,23 @@ decisions, monetization, and go-to-market. No implementation detail.
 - [[monetization|Monetization]] — free vs. freemium vs. one-time; covering running costs vs. goodwill
 - [[go-to-market|Go-to-market]] — seed region (Costa del Sol candidate), how an early community forms
 
-## Open questions (Q&A agenda)
+## Decisions (Q&A status — 2026-07-05)
 
-From the brief's "Decisions to contrast". These drive everything downstream:
+From the brief's "Decisions to contrast". **Resolved** in the first Q&A round:
 
-1. **How social?** private-friends-only · public profiles+leaderboards · hybrid.
-2. **Manual-first or camera-first at launch?** risk vs. wow-factor.
-3. **How is rarity measured?** global · regional · both.
+1. ✅ **How social?** → **private-friends-only** (mutual consent; catalogue readable iff own or accepted edge). Drives the [[../05-domain-core/friendship-fsm|FSM]] and the authz rule.
+3. ✅ **How is rarity measured?** → **regional**, over a hierarchical named-region tree, with a per-vessel hotspot map; global is the zoomed-out view. Denominator is **AIS presence** (via the [[../05-domain-core/regional-presence-port|presence port]], bootstrapped from sightings). See [[../05-domain-core/rarity-surprisal|rarity]].
+6. ✅ **Which platform first?** → **cross-platform** (Expo), already fixed by the stack.
+
+Also settled downstream: the collectible unit is a distinct **`(vessel, region)`** pair; sighting location is **required, coarsened to the region cell**.
+
+**Still open** (next Q&A rounds):
+
+2. **Manual-first or camera-first at launch?** — camera is deferred to M9, so manual-first is implied; confirm.
 4. **Do sightings need proof?** trust · photo-required · photo-optional-but-rewarded.
-5. **Public "boat page" community layer?** purely-personal · shared wiki-style pages.
-6. **Which platform first?** iOS · Android · cross-platform.
+5. **Public "boat page" community layer?** purely-personal · shared wiki-style pages. (Private-only social leans toward purely-personal.)
 7. **How does it sustain itself?** free · freemium · one-time.
-8. **Which region to seed first?** Costa del Sol vs. alternatives.
+8. **Which region to seed first?** Costa del Sol vs. alternatives (interacts with region-tree coverage).
 9. **Smallest first version worth shipping?** the MVP boundary.
 
 ## Sources

@@ -16,33 +16,45 @@ coverage and hypothesis property tests as the acceptance gate.*
 
 ## Scope
 
-The rarity model and its information-theoretic justification, the collection
-score, catalogue-similarity metrics, the friendship finite state machine, and
-the domain exception hierarchy. The relational side lives in
-[[../04-data-model/_MOC|Data model]]; how these are invoked lives in
+The rarity model and its information-theoretic justification, the presence
+port that feeds it, the collection score, catalogue-similarity, the friendship
+finite state machine, and the domain exception hierarchy. The relational side
+lives in [[../04-data-model/_MOC|Data model]]; how these are invoked lives in
 [[../06-features/_MOC|Features]].
 
-## Planned notes
+## Resolved model (2026-07-05 Q&A)
 
-- [[rarity-surprisal|Rarity as surprisal]] — `R(v) = -log2 p̂(v)`, `p̂(v) = (n_v + α)/(N + αV)` (Lidstone smoothing, α=1 ⇒ Laplace); Shannon self-information = IDF; monotonic non-increasing in `n_v`
-- [[collection-score|Collection score]] — `fsum` of per-vessel rarities; rewards rare finds over raw volume; the single number friends compete on
-- [[catalogue-similarity|Catalogue similarity]] — Jaccard over MMSI sets; rarity-weighted Jaccard so shared rare vessels count more; bounds `0 ≤ J ≤ 1`
-- [[friendship-fsm|Friendship FSM]] — `canonical_pair(a,b)` (order-invariant undirected edge); explicit transition table pending→{accepted,declined,blocked}, accepted→{blocked}, declined→{pending}, blocked→∅; illegal moves single raise site
-- [[domain-exceptions|Domain exceptions]] — `BoatDexError` base + one subclass per invariant (self-friendship, duplicate/absent edge, invalid transition, unknown vessel, sighting validation)
+Rarity is **regional**, over counts from an abstract **presence port** (user
+sightings at launch, AIS presence later); the collectible unit is a distinct
+**`(vessel, region)`** pair; the score is a pure sum of regional rarities;
+similarity is **plain** Jaccard; the social model is **private-friends-only**
+so the FSM stands exactly as sketched. Sparse regions are handled by
+**hierarchical shrinkage** up a named-region tree to the global root. Full
+decision table in [[../_README|README]].
 
-## Property tests that must pass (acceptance)
+## Notes (written)
 
-- `surprisal` monotonically non-increasing in `sighting_count`.
-- `jaccard(a, a) == 1` for non-empty `a`; `0 ≤ jaccard(a, b) ≤ 1`.
-- `canonical_pair` is order-invariant.
-- FSM: only table-listed transitions succeed; all others raise.
+- [[regional-presence-port|Regional presence port]] — the `RegionalPresence` Protocol; `SightingBackedPresence` (launch) → `AISPresence` (later) adapters; the contract every adapter satisfies
+- [[rarity-surprisal|Rarity as regional surprisal]] — `R_r(v) = −log₂ p̃_r(v)`; Lidstone base `p̂_r`; Jelinek–Mercer shrinkage `p̃_r = λ_r p̂_r + (1−λ_r) p̃_{parent}`, `λ_r = N_r/(N_r+τ)`; α=1, τ=50; golden test values
+- [[collection-score|Collection score]] — `fsum` of `R_r(v)` over distinct `(MMSI, region)` entries; set-additive, idempotent on re-sighting
+- [[catalogue-similarity|Catalogue similarity]] — plain Jaccard over `(MMSI, region)` sets; `J(∅,∅)=1` convention; `0 ≤ J ≤ 1`
+- [[friendship-fsm|Friendship FSM]] — `canonical_pair`; table pending→{accepted,declined,blocked}, accepted→{blocked}, declined→{pending}, blocked terminal; single illegal-move raise site
+- [[domain-exceptions|Domain exceptions]] — `BoatDexError` base + one subclass per invariant (self-friendship, duplicate/absent edge, invalid transition, unknown vessel, unknown region, sighting validation)
 
-## Open questions (Q&A agenda)
+## Property tests that must pass (acceptance gate)
 
-- Global vs. regional rarity (open decision Q3) changes what `N`, `V`, `n_v` count over — resolve before fixing the formula.
-- Should `α` (smoothing) be tunable per deployment, or fixed at 1.0?
-- Collection score: pure sum, or a diminishing-returns transform to discourage grinding common vessels?
-- Comparison readout ("how alike are our collections?") — plain Jaccard, weighted, or both surfaced?
+- `R_r(v)` non-negative and non-increasing in `n_{v,r}`; backs off to the parent as `N_r → 0`; reduces to IDF `log₂(N/n)` in the single-level, α→0 limit.
+- Presence adapters satisfy the port contract (counts ≥ 0; `n_{v,r} ≤ N_r`; parent chain reaches the root).
+- `score` set-additive, idempotent on re-sighting, order-invariant (`fsum`).
+- `jaccard(a, a) == 1` for non-empty `a`; `0 ≤ jaccard(a, b) ≤ 1`; `J(∅,∅)=1`.
+- `canonical_pair` order-invariant; self-pair raises.
+- FSM: exactly table-listed transitions succeed; all others raise `InvalidTransitionError`.
+
+## Open questions (remaining, smaller)
+
+- Promote `α` (=1.0) and `τ` (=50) from module constants to per-deployment config once AIS data volume is known?
+- Add an **unblock** transition (`blocked → pending`), or keep `blocked` terminal in v1?
+- Region-tree depth/source: which Marine Regions / IHO / EEZ dataset, and how many nesting levels the backoff climbs — a data-artefact decision for the [[../02-architecture/_MOC|AIS region-statistics module]].
 
 ## Sources (citations)
 

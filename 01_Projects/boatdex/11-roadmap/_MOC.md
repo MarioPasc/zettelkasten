@@ -22,7 +22,7 @@ area MOC; this folder tracks *order* and *done-ness*.
 
 ## Planned notes
 
-- [[milestones|Milestones M0–M9]] — M0 scaffolding · M1 domain core · M2 persistence · M3 auth · M4 sightings · M5 social graph · M6 notifications · M7 realtime · M8 mobile client · M9 camera identify; strict M0→M6 order, M7/M8 depend on M6, M9 independent; per-milestone acceptance criteria
+- [[milestones|Milestones M0–M9 + MA]] — M0 scaffolding · M1 domain core (regional rarity + FSM, pure) · M2 persistence (+ `region` tree) · M3 auth · M4 sightings (point-in-polygon → region_id; `SightingBackedPresence` bootstrap adapter) · M5 social graph · M6 notifications · M7 realtime · M8 mobile client · M9 camera identify · **MA AIS region-statistics module** (ingestion → `AISPresence` adapter, swaps in behind the presence port); strict M0→M6 order, M7/M8 depend on M6, M9 and MA independent and off the critical path; per-milestone acceptance criteria
 - [[documentation-protocol|Documentation protocol]] — the `docs/` layout (architecture, adr/ MADR, specs/, progress/PROGRESS.md, api/, CHANGELOG); the per-feature spec template; the milestone close-out checklist (flip PROGRESS, append CHANGELOG, write ADRs, regenerate OpenAPI, check docstring coverage)
 
 ## Open questions (Q&A agenda)

@@ -19,10 +19,15 @@ Project context in [[../_README|README]].*
 <!-- Auto-managed by moc-update. One line per ADR:
      - [[NNNN--slug|NNNN — Title]] — one-line outcome -->
 
-*No ADRs yet. The first ones expected: `0001--tech-stack`,
-`0002-fanout-on-write`, `0003-rarity-surprisal-model`, plus one per resolved
-open product decision (social model, launch mode, rarity scope, proof,
-platform, monetization, seed region, MVP boundary).*
+*No ADRs written yet, but the 2026-07-05 Q&A resolved enough to record several.
+**Ready to write now** (decisions locked, see [[../05-domain-core/_MOC|Domain-core MOC]]):
+`0001--regional-rarity-model` (surprisal + hierarchical shrinkage over a
+presence port), `0002--ais-presence-not-user-sightings` (ground-truth
+denominator; bootstrap then swap), `0003--catch-unit-vessel-region-pair`,
+`0004--social-private-friends-only`, `0005--location-coarsened-to-region`.
+**Still pending** the usual stack ADRs (`tech-stack`, `fanout-on-write`) and the
+unresolved product decisions (proof-of-sighting, monetization, seed region,
+MVP boundary).*
 
 ## Parent
 
