@@ -45,15 +45,21 @@ root is reached in a finite number of steps.
 
 ## Adapters (infrastructure — not domain)
 
-- **`SightingBackedPresence`** — launch default. Counts derive from the
-  `sighting` table: `n_{v,r}` = sightings of MMSI in region r across all users,
-  `N_r` = sightings in r, `V_r` = distinct MMSI in r. Available day one; no new
-  service. Endogenous (a boat looks common because users log it), which is why
-  it is a bootstrap, not the destination.
-- **`AISPresence`** — later milestone. Counts derive from the AIS
+Two adapters run **permanently**, feeding the two rarities in
+[[rarity-surprisal|rarity]] through the identical function:
+
+- **`AISPresence` → R1 (encounter difficulty).** Counts derive from the AIS
   region-statistics module (position reports / vessel-days of v in r). Ground
-  truth, independent of app adoption. Swapping adapters requires no change to
-  rarity, score, or their tests.
+  truth, independent of app adoption. Ships with milestone MA; until then, R1 is
+  computed with the sighting-backed adapter as a temporary stand-in.
+- **`SightingBackedPresence` → R2 (community frequency).** Counts derive from
+  the `sighting` table: `n_{v,r}` = sightings of MMSI in region r across all
+  users, `N_r` = sightings in r, `V_r` = distinct MMSI in r. Available day one,
+  no new service. Endogenous (a vessel looks common because users log it) — which
+  is exactly the community-frequency signal R2 wants.
+
+Both satisfy this one port, so rarity/score code and their tests never change
+when either count source does.
 
 ## Contract (every adapter must satisfy)
 

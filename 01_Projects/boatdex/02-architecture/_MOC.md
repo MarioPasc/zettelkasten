@@ -25,9 +25,10 @@ single spot travels. Technology *choices* live in
 ## Planned notes
 
 - [[hexagonal-architecture|Hexagonal architecture]] — four layers (domain → application → infrastructure → api); why a pure I/O-free core; the `import-linter` contract that `domain/` imports nothing outward
-- [[system-context|System context]] — the component map: client, api routers, application services, domain core, infrastructure adapters (DB, auth, queue, push, AIS); the **presence port** ([[../05-domain-core/regional-presence-port|RegionalPresence]]) as the seam between rarity and its count source
-- [[core-data-flow|Core data flow]] — the central spot path: `client → sightings router → SightingService.create() → resolve lat/lon → region_id → domain validates + computes regional rarity (via presence port) → repository persists → emits SightingCreated → queue → NotificationService fans out → push + WS broadcast`
-- [[ais-region-statistics|AIS region-statistics module]] — the **new, deferred** ingestion service: subscribe to real-time AIS + backfill historical position reports → aggregate per `(vessel, region)` presence stats → back the `AISPresence` adapter. Off the launch critical path; `SightingBackedPresence` bootstraps rarity until it lands
+- [[system-context|System context]] — the component map: client (+ **device GPS & compass sensors**), api routers, application services, domain core, infrastructure adapters (DB, auth, queue, push, **two AIS integrations**); the **presence port** ([[../05-domain-core/regional-presence-port|RegionalPresence]]) as the seam between rarity and its count sources (R1←AIS, R2←sightings)
+- [[core-data-flow|Core data flow]] — the manual spot path: `client → sightings router → SightingService.create() → resolve lat/lon → region_id → domain validates + computes R1 rarity (presence port) → repository persists → emits SightingCreated → queue → NotificationService fans out → push + WS broadcast`
+- [[capture-identify-flow|Capture & identify flow]] — the camera path: `device GPS+heading → live-AIS bounding-box adapter → candidate vessel fixes → domain identify_target (bearing match) + haversine distance → confirm → same SightingService.create()`. Pure geometry in [[../05-domain-core/geodesy-identify|geodesy/identify]]; the camera is an AR viewfinder
+- [[ais-region-statistics|AIS integrations (live + historical)]] — **two** separate AIS uses: (1) **live bounding-box** query for camera identify (low-latency, small area, M9); (2) the **new, deferred** region-statistics ingestion — subscribe + backfill → aggregate per `(vessel, region)` → back `AISPresence`→R1 (MA). `SightingBackedPresence`→R2 bridges R1 until MA lands
 
 ## Open questions (Q&A agenda)
 

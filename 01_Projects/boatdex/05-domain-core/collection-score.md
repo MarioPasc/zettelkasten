@@ -28,7 +28,9 @@ score(u) = fsum( R_{r}(v) for (v, r) in catalogue(u) )
 
 - `catalogue(u)` is the **set** of distinct `(MMSI, region_id)` entries the
   user has logged ≥ 1 sighting for.
-- `R_r(v)` is [[rarity-surprisal|regional rarity]] at the entry's region.
+- `R_r(v)` is **R1** — the AIS encounter-difficulty [[rarity-surprisal|regional
+  rarity]] at the entry's region. The score sums R1 only; **R2** (community
+  frequency) is a shown badge and never enters the score.
 - `fsum` is `math.fsum` — exact partial sums, so a large catalogue of small
   bit-values does not accumulate float drift (matters for tie-breaking on a
   leaderboard).

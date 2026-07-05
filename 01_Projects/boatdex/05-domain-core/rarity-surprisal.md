@@ -14,16 +14,31 @@ sources:
 
 # Rarity as regional surprisal
 
-*A vessel's rarity in a region is its Shannon self-information under a
+*A vessel's rarity is its Shannon self-information under a
 hierarchically-smoothed presence distribution: `R_r(v) = −log₂ p̃_r(v)` bits,
 where `p̃_r` shrinks the region's own estimate toward its parent so
-near-empty regions do not blow up.*
+near-empty regions do not blow up. One function, two live count sources ⇒ two
+surfaced rarities.*
 
 Rarity is the number that makes the collection a game
-([[../01-product/_MOC|Product]]). It is defined **per region** (the resolved
-scope decision) over counts supplied by the
-[[regional-presence-port|regional presence port]] — user sightings at launch,
-AIS presence later — so the maths below never changes when the source does.
+([[../01-product/building-blocks|building blocks]] · block 3). The formula
+below is defined once and evaluated over counts supplied by the
+[[regional-presence-port|regional presence port]]; running it over **two**
+providers yields the product's two rarities.
+
+## Two rarities from one function
+
+| | **R1 — encounter difficulty** | **R2 — community frequency** |
+|---|---|---|
+| Question | "how hard to see this vessel *here*?" | "how many times have users seen it?" |
+| Provider | `AISPresence` (ground-truth AIS) | `SightingBackedPresence` (user sightings) |
+| Scope | **regional** (with backoff to global) | **global**, with a regional breakdown |
+| Role | **feeds the collection score** ([[collection-score]]) | shown **badge**, not summed |
+| Endogenous? | no (real-world) | yes (grows with app usage) |
+
+Both call the identical `rarity(provider, mmsi, region)` below — only the
+injected provider differs. `R1` before the AIS module ships uses the
+sighting-backed provider as a temporary stand-in; `R2` uses it permanently.
 
 ## Definition
 

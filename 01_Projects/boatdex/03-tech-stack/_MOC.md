@@ -25,8 +25,8 @@ coherent group of choices, each ending in a proposed ADR.
 - [[backend-framework|Backend framework]] — FastAPI (async, Pydantic, OpenAPI) · SQLAlchemy 2.0 typed `Mapped[...]` · PostgreSQL (+PostGIS optional) · Alembic migrations
 - [[auth-and-security|Auth & security]] — fastapi-users, Argon2id password hashing, JWT access/refresh; "auth is the wrong place to be original"
 - [[async-realtime-push|Async, realtime & push]] — arq (Redis) task queue (Celery fallback) · WebSocket/SSE live feed · Expo Push / FCM / APNs
-- [[client-stack|Client stack]] — Expo / React Native; cross-platform; defers native-AR work
-- [[data-sources-ais|AIS data source]] — aisstream.io free bounding-box WS → Datalastic / VesselAPI if outgrown; coverage limits (non-AIS boats)
+- [[client-stack|Client stack]] — Expo / React Native; cross-platform; **camera capture is a primary fast-follow** so the client needs device **GPS** (`expo-location`), **compass/orientation** (`expo-sensors` magnetometer), and a **camera + 2D AR overlay** (label vessels by screen-projected bearing). No depth-AR / LiDAR — distance is AIS-derived
+- [[data-sources-ais|AIS data source]] — **two uses of the same feed**: (1) **live bounding-box** query for camera identify (low-latency, small area); (2) **historical presence stats** for R1 rarity + heatmap. aisstream.io free bounding-box WS → Datalastic / VesselAPI if outgrown; coverage limits (non-AIS boats) matter more for live identify
 - [[tooling-and-ci|Tooling & CI]] — ruff (lint+format), mypy --strict, pytest + pytest-cov, pre-commit, hypothesis (domain property tests), import-linter (layer boundary)
 
 ## Open questions (Q&A agenda)

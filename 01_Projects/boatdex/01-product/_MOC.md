@@ -26,6 +26,7 @@ decisions, monetization, and go-to-market. No implementation detail.
 - [[vision-and-positioning|Vision & positioning]] — life-list vs. radar; the gap left by ship-trackers; the experience-not-data thesis
 - [[target-users|Target users]] — primary enthusiast spotter; secondary holidaymakers and local hobby communities; honest note on audience size
 - [[core-experience-loop|Core experience loop]] — spot → identify → log → grow; catalogue, rarity, collection score
+- [[building-blocks|System building blocks]] ✅ *written* — the three **primary** blocks (capture/identify, collectible, rarity/heatmap) vs. **secondary** (friends, client, notifications); priority ordering; the two rarities R1/R2
 - [[product-principles|Product principles]] — the five hard lines: sighting-as-value, no owner ID, public info only, no people-tracking, privacy-by-default
 - [[success-metrics|Success metrics]] — engagement/delight over scale; repeat logging, friend reactions, perceived rarity fairness, "group firsts"
 - [[open-decisions|Open decisions]] — the nine to-contrast questions (the Q&A agenda)
@@ -36,15 +37,15 @@ decisions, monetization, and go-to-market. No implementation detail.
 
 From the brief's "Decisions to contrast". **Resolved** in the first Q&A round:
 
-1. ✅ **How social?** → **private-friends-only** (mutual consent; catalogue readable iff own or accepted edge). Drives the [[../05-domain-core/friendship-fsm|FSM]] and the authz rule.
-3. ✅ **How is rarity measured?** → **regional**, over a hierarchical named-region tree, with a per-vessel hotspot map; global is the zoomed-out view. Denominator is **AIS presence** (via the [[../05-domain-core/regional-presence-port|presence port]], bootstrapped from sightings). See [[../05-domain-core/rarity-surprisal|rarity]].
+1. ✅ **How social?** → **private-friends-only** (mutual consent; catalogue readable iff own or accepted edge). Drives the [[../05-domain-core/friendship-fsm|FSM]] and the authz rule. *(Social is a **secondary** block — see [[building-blocks]].)*
+2. ✅ **Manual-first or camera-first?** → **manual-first MVP, camera primary fast-follow** (not deferred). Both are capture paths of block 1.
+3. ✅ **How is rarity measured?** → **regional** AIS-presence surprisal, hierarchical named-region tree, per-vessel hotspot map. **Two rarities**: R1 (AIS, scores) + R2 (user sightings, badge). See [[../05-domain-core/rarity-surprisal|rarity]].
 6. ✅ **Which platform first?** → **cross-platform** (Expo), already fixed by the stack.
 
-Also settled downstream: the collectible unit is a distinct **`(vessel, region)`** pair; sighting location is **required, coarsened to the region cell**.
+Also settled downstream: the collectible unit is a distinct **`(vessel, region)`** pair; sighting location is **required, coarsened to the region cell**; distance/direction is **AIS-derived** ([[../05-domain-core/geodesy-identify|geodesy]]).
 
 **Still open** (next Q&A rounds):
 
-2. **Manual-first or camera-first at launch?** — camera is deferred to M9, so manual-first is implied; confirm.
 4. **Do sightings need proof?** trust · photo-required · photo-optional-but-rewarded.
 5. **Public "boat page" community layer?** purely-personal · shared wiki-style pages. (Private-only social leans toward purely-personal.)
 7. **How does it sustain itself?** free · freemium · one-time.

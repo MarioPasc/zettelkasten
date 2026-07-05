@@ -62,9 +62,10 @@ Milestone-driven (spec §8). Full board in [[11-roadmap/_MOC|Roadmap MOC]].
 | M1        | Pure domain core (rarity, FSM)         | not started |
 | M2–M3     | Persistence + auth                     | not started |
 | M4–M5     | Sightings/catalogue + social graph     | not started |
-| M6–M7     | Notifications fan-out + realtime        | not started |
-| M8        | Expo mobile client (end-to-end)        | not started |
-| M9        | Camera identify (AIS) — deferred       | not started |
+| M8        | Expo mobile client (manual capture MVP) | not started |
+| M9        | Camera identify — **primary fast-follow** | not started |
+| M6–M7     | Notifications fan-out + realtime (secondary) | not started |
+| MA        | AIS region-statistics (→ R1 rarity)     | not started |
 
 ## Key references
 
@@ -78,10 +79,15 @@ The domain-core math rests on four sources (full cites in
 
 ## Open questions
 
-The nine product decisions (brief §"Decisions to contrast") are the agenda
-for the upcoming Q&A. They live in [[01-product/_MOC|Product MOC]]. In short:
-social model · manual-vs-camera launch · rarity definition · sighting proof ·
-public boat pages · platform first · monetization · seed region · MVP boundary.
+**Resolved 2026-07-05** (see [[01-product/building-blocks|building blocks]] and
+[[05-domain-core/_MOC|Domain-core MOC]]): social = private-friends-only · rarity
+= regional AIS-presence surprisal, **two rarities R1 (scores) / R2 (badge)** ·
+catch unit = `(vessel, region)` · location coarsened to region · camera =
+**primary fast-follow** (manual-first MVP) · distance = AIS-derived (GPS +
+compass + haversine).
+
+**Still open**: sighting proof · public boat pages · monetization · seed
+region · exact MVP cut. They live in [[01-product/_MOC|Product MOC]].
 
 ## Related
 

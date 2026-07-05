@@ -24,29 +24,34 @@ lives in [[../04-data-model/_MOC|Data model]]; how these are invoked lives in
 
 ## Resolved model (2026-07-05 Q&A)
 
-Rarity is **regional**, over counts from an abstract **presence port** (user
-sightings at launch, AIS presence later); the collectible unit is a distinct
-**`(vessel, region)`** pair; the score is a pure sum of regional rarities;
-similarity is **plain** Jaccard; the social model is **private-friends-only**
-so the FSM stands exactly as sketched. Sparse regions are handled by
-**hierarchical shrinkage** up a named-region tree to the global root. Full
+One rarity function `R_r(v) = −log₂ p̃_r(v)`, evaluated over an abstract
+**presence port** by two providers ⇒ **two rarities**: **R1** (AIS presence,
+regional, *feeds the score*) and **R2** (user sightings, global+regional, a
+*shown badge*). The collectible unit is a distinct **`(vessel, region)`** pair;
+the score is a pure sum of **R1**; similarity is **plain** Jaccard; the social
+model is **private-friends-only** so the FSM stands as sketched. Sparse regions
+use **hierarchical shrinkage** up a named-region tree. The capture block's
+distance/direction is derived by pure geometry
+([[geodesy-identify|geodesy & identify]]), not phone depth sensors. Full
 decision table in [[../_README|README]].
 
 ## Notes (written)
 
-- [[regional-presence-port|Regional presence port]] — the `RegionalPresence` Protocol; `SightingBackedPresence` (launch) → `AISPresence` (later) adapters; the contract every adapter satisfies
-- [[rarity-surprisal|Rarity as regional surprisal]] — `R_r(v) = −log₂ p̃_r(v)`; Lidstone base `p̂_r`; Jelinek–Mercer shrinkage `p̃_r = λ_r p̂_r + (1−λ_r) p̃_{parent}`, `λ_r = N_r/(N_r+τ)`; α=1, τ=50; golden test values
-- [[collection-score|Collection score]] — `fsum` of `R_r(v)` over distinct `(MMSI, region)` entries; set-additive, idempotent on re-sighting
+- [[regional-presence-port|Regional presence port]] — the `RegionalPresence` Protocol; `AISPresence`→R1 and `SightingBackedPresence`→R2 adapters (both permanent); the contract every adapter satisfies
+- [[rarity-surprisal|Rarity as regional surprisal]] — `R_r(v) = −log₂ p̃_r(v)`; Lidstone base `p̂_r`; Jelinek–Mercer shrinkage `p̃_r = λ_r p̂_r + (1−λ_r) p̃_{parent}`, `λ_r = N_r/(N_r+τ)`; α=1, τ=50; **R1/R2 from one function**; golden values
+- [[collection-score|Collection score]] — `fsum` of **R1** over distinct `(MMSI, region)` entries; set-additive, idempotent on re-sighting
 - [[catalogue-similarity|Catalogue similarity]] — plain Jaccard over `(MMSI, region)` sets; `J(∅,∅)=1` convention; `0 ≤ J ≤ 1`
+- [[geodesy-identify|Geodesy & identify]] — haversine distance, initial bearing, angular diff, `identify_target` (bearing-match the pointed-at vessel); pure, no AIS I/O; golden equator values
 - [[friendship-fsm|Friendship FSM]] — `canonical_pair`; table pending→{accepted,declined,blocked}, accepted→{blocked}, declined→{pending}, blocked terminal; single illegal-move raise site
 - [[domain-exceptions|Domain exceptions]] — `BoatDexError` base + one subclass per invariant (self-friendship, duplicate/absent edge, invalid transition, unknown vessel, unknown region, sighting validation)
 
 ## Property tests that must pass (acceptance gate)
 
-- `R_r(v)` non-negative and non-increasing in `n_{v,r}`; backs off to the parent as `N_r → 0`; reduces to IDF `log₂(N/n)` in the single-level, α→0 limit.
+- `R_r(v)` non-negative and non-increasing in `n_{v,r}`; backs off to the parent as `N_r → 0`; reduces to IDF `log₂(N/n)` in the single-level, α→0 limit — and holds for **both** R1 and R2 (same function, different provider).
 - Presence adapters satisfy the port contract (counts ≥ 0; `n_{v,r} ≤ N_r`; parent chain reaches the root).
-- `score` set-additive, idempotent on re-sighting, order-invariant (`fsum`).
+- `score` set-additive, idempotent on re-sighting, order-invariant (`fsum`); sums R1 only.
 - `jaccard(a, a) == 1` for non-empty `a`; `0 ≤ jaccard(a, b) ≤ 1`; `J(∅,∅)=1`.
+- Geodesy: `d(a,a)=0`, symmetric, `≥0`; reciprocal bearing ≈ 180°; `angular_diff` wraps to `[0,180]`; `identify_target` returns `None` iff no candidate within tolerance.
 - `canonical_pair` order-invariant; self-pair raises.
 - FSM: exactly table-listed transitions succeed; all others raise `InvalidTransitionError`.
 
