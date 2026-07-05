@@ -3,7 +3,7 @@ title: "Tag Taxonomy"
 type: moc
 status: active
 created: 2026-05-08
-updated: 2026-05-08
+updated: 2026-07-05
 tags: [type/moc, meta/taxonomy, status/active]
 ---
 
@@ -95,6 +95,23 @@ fits. If a domain doesn't exist, add it here first.
 - `#domain/evaluation-metrics`
 - `#domain/fid-3d`
 
+### Software / product (non-research side projects)
+
+Added 2026-07-05 for BoatDex (non-research app). These extend the existing
+`#domain/*` namespace to cover product-engineering subjects; no new
+top-level namespace is introduced.
+
+- `#domain/software-product` — a shipped product (vs. a research artifact)
+- `#domain/product` — product definition / UX / go-to-market
+- `#domain/mobile-app` — mobile client concerns
+- `#domain/backend` — server-side / infrastructure
+- `#domain/api-design` — HTTP/WS interface design
+- `#domain/data-modeling` — relational / domain schema design
+- `#domain/geospatial` — geographic data (PostGIS, coordinates)
+- `#domain/social-graph` — friendship / social-network structure
+- `#domain/information-retrieval` — IDF / surprisal / ranking (BoatDex rarity)
+- `#domain/privacy-gdpr` — data protection / GDPR compliance
+
 ## `#project/*` — active project slugs
 
 - `#project/repa-maisi-3d-mri`
@@ -102,6 +119,7 @@ fits. If a domain doesn't exist, add it here first.
 - `#project/meningioma-growth`
 - `#project/mengrowth-prediction-uncertainty-propagation`
 - `#project/slim-diff`
+- `#project/boatdex`
 - *(extend as projects start; mirror the folder slug under `01_Projects/`)*
 
 ## `#venue/*` — publication venues / conferences

@@ -15,6 +15,7 @@ first (status), then alphabetical by name.*
 ## Children
 
 - [[mengrowth-prediction-uncertainty-propagation/_MOC|MenGrowth Prediction · Uncertainty Propagation]] — propagate deep-ensemble (procedural) segmentation uncertainty into a heteroscedastic LME for meningioma growth forecasting
+- [[boatdex/_MOC|BoatDex]] — non-research side project: a life-list boat-spotting mobile app with rarity scoring and a social layer (FastAPI + Expo); currently in product-spec Q&A
 - [[example-repa-maisi-3d-mri/_MOC|Example — REPA-MAISI 3D MRI]] — example project, replace with real ones
 
 ## Parent
