@@ -27,7 +27,7 @@ coherent group of choices, each ending in a proposed ADR.
 - [[async-realtime-push|Async, realtime & push]] — arq (Redis) task queue (Celery fallback) · WebSocket/SSE live feed · Expo Push / FCM / APNs
 - [[client-stack|Client stack]] — Expo / React Native; cross-platform; **camera capture is a primary fast-follow** so the client needs device **GPS** (`expo-location`), **compass/orientation** (`expo-sensors` magnetometer), and a **camera + 2D AR overlay** (label vessels by screen-projected bearing). No depth-AR / LiDAR — distance is AIS-derived
 - [[data-sources-ais|AIS data source]] — **two uses of the same feed**: (1) **live bounding-box** query for camera identify (low-latency, small area); (2) **historical presence stats** for R1 rarity + heatmap. aisstream.io free bounding-box WS → Datalastic / VesselAPI if outgrown; coverage limits (non-AIS boats) matter more for live identify
-- [[tooling-and-ci|Tooling & CI]] — ruff (lint+format), mypy --strict, pytest + pytest-cov, pre-commit, hypothesis (domain property tests), import-linter (layer boundary)
+- [[tooling-and-ci|Tooling & CI]] ✅ *written* — **uv** (Python 3.12) · ruff · mypy --strict · pytest + pytest-cov (100% branch on domain) · hypothesis · pre-commit · import-linter · **GitHub Actions** CI; private monorepo layout
 
 ## Open questions (Q&A agenda)
 

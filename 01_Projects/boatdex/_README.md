@@ -36,13 +36,14 @@ Expo), and test whether a real hobby community forms.
 
 *(Proposed in the spec; each choice becomes an ADR in `decisions/`.)*
 
-- **Code repo:** `<to-create>` (Python monorepo `boatdex/` + `client/` Expo app)
-- **Backend:** FastAPI · SQLAlchemy 2.0 · PostgreSQL (+PostGIS) · Alembic
+- **Code repo:** private GitHub **monorepo** `boatdex/` — `src/boatdex/` (FastAPI backend) + `client/` (Expo app, M8); license deferred to release. Managed with **uv**, Python **3.12**.
+- **Backend:** FastAPI · SQLAlchemy 2.0 · PostgreSQL · Alembic · **h3-py** (runtime region resolution); PostGIS/shapely **offline-only**
 - **Auth:** fastapi-users (Argon2id + JWT access/refresh)
 - **Async / realtime:** arq (Redis) · WebSocket/SSE · Expo Push / FCM / APNs
 - **Client:** Expo / React Native (cross-platform)
-- **AIS feed:** aisstream.io (free WS) → Datalastic/VesselAPI if outgrown
-- **Tooling:** ruff · mypy --strict · pytest + hypothesis · pre-commit · import-linter
+- **AIS feed:** aisstream.io (free WS) → Datalastic/Spire if outgrown; `pyais` for decoding (later milestones)
+- **Region data:** Marine Regions — IHO Sea Areas + World EEZ (MRGID; CC-BY 4.0), offline build
+- **Tooling:** uv · ruff · mypy --strict · pytest + pytest-cov + hypothesis · pre-commit · import-linter · GitHub Actions
 - See [[03-tech-stack/_MOC|Tech-stack MOC]] for the full rationale.
 
 ## Status

@@ -45,7 +45,7 @@ pair `{a, b}` has exactly one row regardless of who initiated.
 | `pending` | block | `blocked` | |
 | `accepted` | block | `blocked` | |
 | `declined` | request | `pending` | re-request allowed |
-| `blocked` | — | — | **terminal**: no legal outgoing transition |
+| `blocked` | — | — | **terminal**: no legal transition; *unblock = delete the edge* (a repo op), then re-request |
 
 Any `(state, action)` not in the table raises `InvalidTransitionError` from a
 **single** raise site (one `_apply` function), so the illegal surface is one
@@ -82,7 +82,8 @@ tested branch, not scattered `if`s.
 
 - No follow/asymmetric model (private-friends-only was chosen; there are no
   public profiles to follow).
-- No unblock transition in v1 (open micro-question flagged in [[_MOC|the MOC]]).
+- No unblock *transition*: `blocked` is terminal; unblocking is **edge deletion**
+  (like unfriend), after which a fresh `request` may start (decided 2026-07-06).
 - Does not persist — persistence is a repository adapter; this is pure logic.
 
 #type/concept #status/active #domain/backend #project/boatdex

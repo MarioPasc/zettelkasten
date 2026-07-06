@@ -63,8 +63,7 @@ decision table in [[../_README|README]].
 
 ## Open questions (remaining, smaller)
 
-- Add an **unblock** transition (`blocked → pending`), or keep `blocked` terminal in v1?
-- H3 **base resolution** (res 4; res 5 for micro-EEZs) and how many named-region levels the backoff climbs — a versioned `RegionConfig` / data-artefact decision ([[region-model]]).
+- H3 **base resolution** (res 4; res 5 for micro-EEZs) and how many named-region levels the backoff climbs — a versioned `RegionConfig` / data-artefact decision, empirical at build time ([[region-model]]).
 
 ## Sources (citations)
 
