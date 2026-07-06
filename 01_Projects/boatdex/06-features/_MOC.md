@@ -23,7 +23,7 @@ One note per user-facing capability. Features cite the mechanics in
 
 ## Planned notes
 
-- [[sightings-and-catalogue|Sightings & catalogue]] — **manual capture is the MVP path** (search/pick a vessel → save with region); create/list a sighting; dedup on `(MMSI, region_id)`; location coarsened to the region cell; the personal catalogue with counts, first/last seen, **R1 rarity + R2 badge**; future-dated spot → validation error
+- [[sightings-and-catalogue|Sightings & catalogue]] ✅ *written* — **manual capture is the MVP path** (search registry or introduce a vessel → save with region); create/list a sighting; collectible unit `(vessel_id, region_id)`; location coarsened to the region cell; **photo-only verification at MVP** (proximity deferred to P6); the personal catalogue with counts, first/last seen, **R1 rarity + R2 badge**; future-dated spot → validation error
 - [[accounts-and-profiles|Accounts & profiles]] — per-user account; private-by-default collection; display name; account lifecycle
 - [[friends-and-graph|Friends & graph]] — send/accept/decline requests, unfriend, block; mutual (both agree); canonical-edge uniqueness
 - [[collection-comparison|Collection comparison]] — mine ∩ theirs, only-mine, only-theirs; "how alike?" (Jaccard) readout; rare shared finds highlighted
@@ -36,7 +36,7 @@ One note per user-facing capability. Features cite the mechanics in
 *Resolved:* comparison is **friends-only** (private social model); camera is a
 **primary fast-follow**, not deferred, with manual as the day-one fallback.
 
-- Proof-of-sighting (open decision Q4) directly shapes the sightings feature: trust / photo-required / photo-optional-but-rewarded.
+- ✅ Proof-of-sighting (Q4) → **photo-optional**; a photo sets `verification='photo'`, else unverified. Server-side **proximity** check deferred to P6 (needs live-AIS positions). See [[sightings-and-catalogue|the feature spec]].
 - Manual identify: search by name/MMSI, pick from a nearby list, or free-text with later reconciliation?
 - Camera identify: bearing-match tolerance and what to do when several vessels share a bearing (list to disambiguate?); behaviour when AIS returns nothing (fall back to manual).
 - R2 (community-frequency) display: a numeric badge, a percentile, or a "seen by N users" count?

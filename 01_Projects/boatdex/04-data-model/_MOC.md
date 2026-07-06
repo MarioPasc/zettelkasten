@@ -35,8 +35,8 @@ so the schema stores raw `sighting` rows; regional/global counts are computed
 ## Planned notes
 
 - [[relational-schema|Relational schema]] ✅ *written* — `app_user`, `vessel` (**surrogate UUID PK; MMSI unique-nullable**; `source` manual/ais), `region` (`region_id` TEXT PK, `parent_id` self-FK, `level`, **PostGIS `geom`** for point-in-polygon), `sighting` (**`region_id` NOT NULL**, **no stored lat/lon**, optional `photo_url` + `verified`/`verification`/`observer_distance_m`), `friendship` (canonical edge, `CHECK user_low < user_high`), `notification`, `push_token`; presence counts **computed on demand**
-- [[domain-entities|Domain entities]] — frozen `@dataclass` `Vessel`, `Region`, `Sighting`, `CatalogueEntry` (keyed `(vessel_id, region_id)`), `Friendship`; `FriendshipStatus` enum; no I/O, no ORM
-- [[catalogue-derivation|Catalogue derivation]] — `catalogue_entry` view: distinct **`(user, vessel_id, region_id)`** with `sighting_count`, `first_seen`, `last_seen`; regional rarity joined at read time via the presence port
+- [[domain-entities|Domain entities]] ✅ *written* — frozen `@dataclass` `Vessel`, `Region`, `Sighting`, `CatalogueEntry` (keyed `(vessel_id, region_id)`), `Friendship`; `FriendshipStatus` enum; no I/O, no ORM
+- [[catalogue-derivation|Catalogue derivation]] ✅ *written* — `catalogue_entry` view: distinct **`(user, vessel_id, region_id)`** with `sighting_count`, `first_seen`, `last_seen`; regional rarity joined at read time via the presence port
 
 ## Decisions (resolved 2026-07-06 Q&A → see [[relational-schema|Relational schema]])
 
