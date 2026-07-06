@@ -26,17 +26,23 @@ change with zero domain rework.
 ## The port (domain interface)
 
 ```python
-RegionId = str      # opaque region-tree node id (the Marine Regions MRGID)
-MMSI = int          # 9-digit maritime identifier
+from uuid import UUID
+from ..value_objects import RegionId   # value object over the Marine Regions MRGID
+
+# Vessels are keyed by the surrogate vessel_id (UUID) — NOT MMSI — matching the catalogue
+# unit (vessel_id, region) and the MMSI-nullable decision. `RegionId` is the value object
+# from value_objects (coding-standards §2: no raw int/str crosses the boundary). The AIS
+# adapter maps its MMSI-keyed data to vessel_id internally, so the domain never sees MMSI
+# in the presence path. (Optionally: `VesselId = NewType("VesselId", UUID)` for type safety.)
 
 class RegionalPresence(Protocol):
-    def region_total(self, region: RegionId) -> int: ...        # N_r  : all observations in region r
-    def region_vocabulary(self, region: RegionId) -> int: ...   # V_r  : distinct vessels observed in r
-    def vessel_count(self, mmsi: MMSI, region: RegionId) -> int: ...  # n_{v,r}
-    def parent(self, region: RegionId) -> RegionId | None: ...  # backoff step; None only at the global root
-    def global_total(self) -> int: ...                          # N at the global root
-    def global_vocabulary(self) -> int: ...                     # V at the global root
-    def vessel_global_count(self, mmsi: MMSI) -> int: ...       # n_{v,global}
+    def region_total(self, region: RegionId) -> int: ...              # N_r  : all observations in region r
+    def region_vocabulary(self, region: RegionId) -> int: ...         # V_r  : distinct vessels observed in r
+    def vessel_count(self, vessel_id: UUID, region: RegionId) -> int: ...  # n_{v,r}
+    def parent(self, region: RegionId) -> RegionId | None: ...        # backoff step; None only at the global root
+    def global_total(self) -> int: ...                                # N at the global root
+    def global_vocabulary(self) -> int: ...                           # V at the global root
+    def vessel_global_count(self, vessel_id: UUID) -> int: ...        # n_{v,global}
 ```
 
 The port is read-only and side-effect-free. `parent` walks the hierarchical
@@ -49,14 +55,15 @@ Two adapters run **permanently**, feeding the two rarities in
 [[rarity-surprisal|rarity]] through the identical function:
 
 - **`AISPresence` → R1 (encounter difficulty).** Counts derive from the AIS
-  region-statistics module (position reports / vessel-days of v in r). Ground
-  truth, independent of app adoption. Ships with milestone MA; until then, R1 is
-  computed with the sighting-backed adapter as a temporary stand-in.
-- **`SightingBackedPresence` → R2 (community frequency).** Counts derive from
-  the `sighting` table: `n_{v,r}` = sightings of MMSI in region r across all
-  users, `N_r` = sightings in r, `V_r` = distinct MMSI in r. Available day one,
-  no new service. Endogenous (a vessel looks common because users log it) — which
-  is exactly the community-frequency signal R2 wants.
+  region-statistics module (position reports / vessel-days of v in r). The adapter
+  **maps MMSI → vessel_id** via the vessel registry; a vessel with no MMSI has zero
+  AIS presence (rarity backs off). Ground truth, independent of app adoption. Ships
+  with milestone MA; until then, R1 uses the sighting-backed adapter as a stand-in.
+- **`SightingBackedPresence` → R2 (community frequency).** Counts derive from the
+  `sighting` table keyed by the surrogate `vessel_id`: `n_{v,r}` = sightings of
+  `vessel_id` in region r across all users, `N_r` = sightings in r, `V_r` = distinct
+  `vessel_id` in r. Available day one, no new service. Endogenous (a vessel looks
+  common because users log it) — exactly the community-frequency signal R2 wants.
 
 Both satisfy this one port, so rarity/score code and their tests never change
 when either count source does.

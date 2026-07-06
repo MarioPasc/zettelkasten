@@ -67,9 +67,16 @@ GET  /me/catalogue                 entries + r1_bits + r2_bits + collection_scor
 
 `SightingService.create()` is the **one funnel** every capture path reuses
 (manual now, camera at P6):
-`resolve region (PostGIS ST_Covers) → validate invariants → set verification
-from photo → compute R1 via presence port → persist sighting (no lat/lon) →
-emit SightingCreated`.
+`resolve region (H3 latlng_to_cell → region_cell lookup) → validate invariants →
+set verification from photo → compute R1 via presence port → persist sighting
+(no lat/lon) → emit SightingCreated`.
+
+**`SightingCreated` domain event** (emitted by the funnel; consumed by
+notifications at P10) carries the **minimal facts** only — `sighting_id`,
+`user_id`, `vessel_id`, `region_id`, `spotted_at` (ISO-8601 UTC). Derived or
+mutable data (rarity `r1_bits`, `verified`/`verification`) is **re-fetched** by
+consumers, not carried, so the event stays stable across milestones.
+`as_payload()` returns this as a JSON-safe dict.
 
 Region resolution fallback: if no GPS fix is supplied, the client offers a
 manual region pick from the tree (no silent default).

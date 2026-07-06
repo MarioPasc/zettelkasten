@@ -36,7 +36,7 @@ providers yields the product's two rarities.
 | Role | **feeds the collection score** ([[collection-score]]) | shown **badge**, not summed |
 | Endogenous? | no (real-world) | yes (grows with app usage) |
 
-Both call the identical `rarity(provider, mmsi, region, config)` below — only
+Both call the identical `rarity(provider, vessel_id, region, config)` below — only
 the injected provider differs (`config` is the shared `RarityConfig`). `R1`
 before the AIS module ships uses the
 sighting-backed provider as a temporary stand-in; `R2` uses it permanently.
