@@ -17,14 +17,15 @@ Produce a single scalar ranking a collector's catalogue by the total surprisal o
 
 ## Key implementation facts
 
-- **`collection_score(entries: Iterable[CatalogueEntry]) -> float`**: iterates over `CatalogueEntry.rarity` values and accumulates with `math.fsum`.
-- **`math.fsum`** chosen for exact floating-point summation (compensated sum) — the result is independent of iteration order. A simple `sum()` would produce order-dependent rounding errors for large catalogues.
+- **`collection_score(rarities: Iterable[float]) -> float`**: accepts an iterable of R1 rarity values (in bits) and returns `math.fsum(rarities)`.
+- The function has no knowledge of `CatalogueEntry`. Callers supply the rarity values — typically by reading `CatalogueEntry.rarity_bits` (stored on the entity in `entities.py`) for each distinct `(vessel, region)` catalogue entry. Mapping entries to floats is an application-layer concern.
+- **`math.fsum`** gives an exactly-rounded partial-sum total (compensated sum), making the result order-invariant and free of float drift across large catalogues — relevant for leaderboard tie-breaking.
 - Returns `0.0` for an empty iterable.
 - No caching or memoisation at the domain level; caching is an infrastructure concern.
 
 ## Tests / coverage
 
-`tests/domain/test_score.py`: empty catalogue (0.0), single entry, multi-entry, Hypothesis property (score equals sum of individual rarities regardless of order), golden value with known rarity inputs. 100% branch coverage.
+`tests/domain/test_score.py`: empty iterable (`0.0`), single entry, multi-entry, Hypothesis property (score equals sum of individual rarities regardless of order), golden value with known rarity inputs. 100% branch coverage.
 
 #type/concept #project/boatdex #status/done
 

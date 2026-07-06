@@ -9,7 +9,7 @@ tags: [type/concept, project/boatdex, status/done]
 
 # Code note — presence port
 
-*`RegionalPresence` is a `typing.Protocol` (7 methods) that abstracts regional sighting counts so that the domain's rarity and catalogue logic can be tested without a database.*
+*`RegionalPresence` is a `typing.Protocol` (7 methods) that abstracts regional vessel-observation counts, keying regions on `RegionId` and vessels on `vessel_id: UUID` — MMSI never appears in the port.*
 
 ## Goal
 
@@ -17,26 +17,26 @@ Decouple the domain's statistical computations (rarity, presence) from any concr
 
 ## Key implementation facts
 
-- `RegionalPresence` is a `typing.Protocol` (PEP 544); runtime-checkable for assertion in tests.
+- `RegionalPresence` is a `typing.Protocol` (PEP 544); structural subtyping only — no `runtime_checkable` decorator.
+- Vessels are keyed by surrogate `vessel_id: UUID`; regions by the `RegionId` value object. MMSI never appears in the port — the AIS adapter maps its MMSI-keyed data to `vessel_id` internally before calling any port method.
 - Seven methods:
-  - `vessel_count_in_region(mmsi: MMSI, region: RegionId) -> int` — local sightings of one vessel in one region.
-  - `total_count_in_region(region: RegionId) -> int` — total sightings in region (N_r).
-  - `global_vessel_count(mmsi: MMSI) -> int` — vessel appearances across all regions.
-  - `global_total_count() -> int` — all sightings globally (N_global).
-  - `regions_for_vessel(mmsi: MMSI) -> frozenset[RegionId]` — which regions a vessel has been seen in.
-  - `vessels_in_region(region: RegionId) -> frozenset[MMSI]` — which vessels are known in a region.
-  - `catalogue_entry_count(mmsi: MMSI) -> int` — how many collectors have logged this vessel.
-- All method signatures use `MMSI` and `RegionId` value objects — no raw `int` identifiers cross the boundary (see [[../code-decisions/0001--port-and-rarity-use-value-objects|decision 0001]]).
-- Contract invariants encoded as assertions in `DictPresence` (test double):
-  1. `vessel_count_in_region ≤ total_count_in_region`.
-  2. `global_vessel_count ≥ vessel_count_in_region` for any region.
-  3. `total_count_in_region ≤ global_total_count`.
-  4. `regions_for_vessel` and `vessels_in_region` are consistent (bidirectional index).
-  5. Counts are non-negative integers.
+  - `region_total(region: RegionId) -> int` — total observations in the region (N_r).
+  - `region_vocabulary(region: RegionId) -> int` — distinct vessels observed in the region (V_r).
+  - `vessel_count(vessel_id: UUID, region: RegionId) -> int` — observations of one vessel in one region (n_{v,r}).
+  - `parent(region: RegionId) -> RegionId | None` — backoff parent; `None` only at the global root.
+  - `global_total() -> int` — total observations at the global root (N_global).
+  - `global_vocabulary() -> int` — distinct vessels at the global root (V_global).
+  - `vessel_global_count(vessel_id: UUID) -> int` — observations of one vessel across all regions (n_{v,global}).
+- Contract invariants (exercised by the parametrised presence contract test):
+  1. All counts are `>= 0`.
+  2. `vessel_count(v, r) <= region_total(r)`.
+  3. `region_total(r) > 0` implies `region_vocabulary(r) >= 1`.
+  4. `parent(r) is None` iff `r` is the global root; the parent chain is finite and acyclic.
+  5. Roll-up: `region_total(parent(r)) >= region_total(r)` and `vessel_global_count(v) >= vessel_count(v, r)`.
 
 ## Tests / coverage
 
-`tests/domain/test_presence.py`: `DictPresence` structural check, invariant assertions, edge cases (vessel not seen, empty region). 100% branch coverage on the protocol module (protocol itself has no branches; coverage exercised via double).
+`tests/domain/test_presence.py`: structural check via `DictPresence`, invariant assertions, edge cases (vessel not seen, empty region). 100% branch coverage on the protocol module (the protocol itself has no branches; coverage exercised via the double).
 
 #type/concept #project/boatdex #status/done
 

@@ -9,28 +9,30 @@ tags: [type/concept, project/boatdex, status/done]
 
 # Code note — social
 
-*`canonical_pair` for order-invariant friendship identity; FSM implemented as a single transition table with a single raise site (`assert_transition`).*
+*`canonical_pair` for order-invariant friendship identity; FSM encoded as a single `_TRANSITIONS` dict with a single raise site in `assert_transition`. There is no `apply_transition`.*
 
 ## Goal
 
-Enforce friendship lifecycle rules (the FSM) in pure domain code; no persistence, no HTTP — only state validation and transition application.
+Enforce friendship lifecycle rules (the FSM) in pure domain code; no persistence, no HTTP — only state validation and transition result.
 
 ## Key implementation facts
 
-- **`canonical_pair(a: UUID, b: UUID) -> tuple[UUID, UUID]`**: returns `(min(a,b), max(a,b))` for order-invariant edge identity. Raises `SelfFriendshipError` if `a == b`.
-- **FSM transition table** (`dict[FriendshipStatus, frozenset[FriendshipStatus]]`):
-  - `PENDING` → `{ACCEPTED, DECLINED, BLOCKED}`
-  - `ACCEPTED` → `{BLOCKED}`
-  - `DECLINED` → `{PENDING}` (requester may re-send)
-  - `BLOCKED` → `{}` (terminal — unblock = edge deletion, not a transition)
-- **Single raise site**: `assert_transition(current: FriendshipStatus, target: FriendshipStatus) -> None` — raises `InvalidTransitionError` with `current` and `target` attrs if the transition is not in the table. All other functions call this one function, so the error path is defined in exactly one place.
-- **`apply_transition(friendship: Friendship, target: FriendshipStatus, clock: Clock) -> Friendship`**: returns a new `Friendship` (frozen) with `status = target` and `updated_at = clock.now()`.
-- **Unblock** is modelled as edge deletion (remove the `Friendship` row entirely), not as a `BLOCKED → UNBLOCKED` transition — per spec, there is no `UNBLOCKED` state.
-- `DuplicateEdgeError` and `AbsentEdgeError` are raised by the repository layer (M2), not the FSM.
+- **`FriendshipAction(StrEnum)`**: four variants — `REQUEST = "request"`, `ACCEPT = "accept"`, `DECLINE = "decline"`, `BLOCK = "block"`.
+- **`canonical_pair(a: UUID, b: UUID) -> tuple[UUID, UUID]`**: returns `(a, b) if a < b else (b, a)` for order-invariant edge identity. Raises `SelfFriendshipError(a)` if `a == b`.
+- **`_TRANSITIONS: dict[tuple[FriendshipStatus, FriendshipAction], FriendshipStatus]`** — the complete legality table (any pair absent is illegal):
+  - `(PENDING, ACCEPT)` → `ACCEPTED`
+  - `(PENDING, DECLINE)` → `DECLINED`
+  - `(PENDING, BLOCK)` → `BLOCKED`
+  - `(ACCEPTED, BLOCK)` → `BLOCKED`
+  - `(DECLINED, REQUEST)` → `PENDING`
+  - `BLOCKED` has no outgoing entries — it is terminal.
+- **`assert_transition(current: FriendshipStatus, action: FriendshipAction) -> FriendshipStatus`**: looks up `(current, action)` in `_TRANSITIONS`; if absent, raises `InvalidTransitionError(current, action)`. This is the **single raise site** for all illegal-transition errors. Returns the resulting `FriendshipStatus`; callers apply it to the entity.
+- There is **no `apply_transition`** function in this module.
+- Unblock is modelled as edge deletion (remove the `Friendship` row entirely), not a state transition — there is no `UNBLOCKED` state.
 
 ## Tests / coverage
 
-`tests/domain/test_social.py`: `canonical_pair` symmetry + self-friendship, all valid transitions, all invalid transitions (each raises `InvalidTransitionError`), BLOCKED terminal, `apply_transition` timestamp update. 100% branch coverage.
+`tests/domain/test_social.py`: `canonical_pair` symmetry and self-friendship, all five legal transitions, illegal transitions (each raises `InvalidTransitionError`), `BLOCKED` terminal state. 100% branch coverage.
 
 #type/concept #project/boatdex #status/done
 
