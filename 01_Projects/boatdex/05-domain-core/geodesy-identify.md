@@ -62,8 +62,10 @@ def identify_target(
 ## Invariants
 
 1. `haversine_distance(a, a) == 0`; symmetric; `≥ 0`.
-2. `angular_diff(initial_bearing(a, b), initial_bearing(b, a)) ≈ 180°`
-   (reciprocal bearing), for `a ≠ b`.
+2. **Reciprocal bearing.** `angular_diff(initial_bearing(a,b), initial_bearing(b,a))
+   = 180°` **exactly only** on a shared meridian or the equator; in general it deviates
+   from 180° by the meridian convergence `≈ Δlon·sin(lat)`. Over camera-range
+   separations the deviation is negligible.
 3. `angular_diff` wraps: `angular_diff(359, 1) == 2`; range `[0, 180]`; symmetric.
 4. `identify_target` returns `None` iff no candidate is within `tolerance_deg`.
 5. Purity — no clock, no I/O, deterministic.
@@ -88,7 +90,7 @@ bearings `{90° (east), 0° (north), 270° (west)}` ⇒ returns the east vessel
 **Property (hypothesis):**
 
 - `test_distance_zero_symmetric_nonneg` — random points ⇒ `d(a,a)=0`, `d(a,b)=d(b,a)`, `d≥0`.
-- `test_reciprocal_bearing` — `a≠b` ⇒ `angular_diff(bearing(a,b), bearing(b,a)) ≈ 180` (`atol=1e-6`).
+- `test_reciprocal_bearing` — on a shared meridian/equator, `angular_diff(bearing(a,b), bearing(b,a)) == 180` exactly (`atol=1e-6`); for general small separations it holds only within a tolerance scaling as `Δlon·sin(lat)` — **not** a blanket `≈180 for all a≠b`.
 - `test_angular_diff_wraps` — `∀ x,y: 0 ≤ angular_diff(x,y) ≤ 180` and `angular_diff(359,1)==2`.
 - `test_identify_none_outside_tolerance` — all candidates > tolerance away ⇒ `None`.
 

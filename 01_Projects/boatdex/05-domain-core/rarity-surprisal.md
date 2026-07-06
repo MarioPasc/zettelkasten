@@ -109,12 +109,12 @@ Two-level tree, region `r` (e.g. Alborán Sea) with parent = global.
 
 | Case | `n_{v,r}` | `p̃_r(v)` | `R_r(v)` (bits) |
 |------|-----------|----------|-----------------|
-| seen twice locally | 2 | `0.0335884` | `4.8957` |
-| unseen locally | 0 | `0.0131803` | `6.2446` |
+| seen twice locally | 2 | `79/2352 ≈ 0.0335884` | `4.895892` |
+| unseen locally | 0 | `31/2352 ≈ 0.0131803` | `6.245476` |
 
 Derivation of row 1: `p̃_global = 5/1200 = 0.00416667`; `p̂_r = 3/28 = 0.107143`;
 `λ_r = 20/70 = 0.285714`; `p̃_r = 0.285714·0.107143 + 0.714286·0.00416667 =
-0.0335884`; `R = −log₂ 0.0335884 = 4.8957`. Tests pin these at `rtol=1e-6`.
+0.0335884`; `R = −log₂ 0.0335884 = 4.895892` (corrected 2026-07-06 — the earlier `4.8957`/`6.2446` bits were mis-rounded; the `p̃` column was already exact). Tests pin the exact `math.log2(p̃)` value.
 
 ## Acceptance tests
 
