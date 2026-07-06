@@ -20,7 +20,10 @@ the spec, it does not belong here — raise it against the spec instead.*
 <!-- Auto-managed by the impl-doc skill. One line per ADR:
      - [[NNNN--slug|NNNN — Title]] — one-line outcome -->
 
-*No code decisions yet.*
+- [[0001--port-and-rarity-use-value-objects|0001 — Port and rarity use value objects]] — `RegionalPresence` and `rarity()` typed over `MMSI`/`RegionId` value objects, not raw `int` aliases
+- [[0002--test-doubles-live-under-tests|0002 — Test doubles live under tests/]] — `FixedClock`, `FakeClock`, `DictPresence` in `tests/doubles.py`; `pythonpath=["tests"]` in pytest config
+- [[0003--value-object-exception-split|0003 — Value-object exception split]] — MMSI/IMO/Coordinate raise `ValidationError` family; ShipType/RegionId/Distance raise builtin `ValueError`
+- [[0004--golden-and-property-tolerances|0004 — Golden and property tolerances]] — tests pin exact −log₂(p̃) and meridian/equator bearings; spec numeric discrepancies framed as findings to raise
 
 ## Parent
 

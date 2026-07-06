@@ -3,6 +3,7 @@ title: "Implementation progress board"
 type: moc
 created: 2026-07-06
 updated: 2026-07-06
+branch: feature/m0-m1-domain-core
 tags: [type/moc, project/boatdex, status/active]
 ---
 
@@ -18,8 +19,8 @@ tracks **code reality**, not design intent.*
 
 | Milestone | Scope | Status | Coverage | Notes |
 |-----------|-------|--------|----------|-------|
-| M0 | Repo, uv, hexagonal skeleton, tooling, CI | ⬜ not started | — | first job for the coding agent |
-| M1 | Pure domain core (value objects, rarity, FSM, geodesy, presence port) | ⬜ not started | — | |
+| M0 | Repo, uv, hexagonal skeleton, tooling, CI | ✅ done | — | [[build-sessions/2026-07-06T1448--m0-m1-domain-core\|session log]] |
+| M1 | Pure domain core (value objects, rarity, FSM, geodesy, presence port) | ✅ done | 100% branch (353 stmts / 66 branches, 142 tests) | branch `feature/m0-m1-domain-core`; [[build-sessions/2026-07-06T1448--m0-m1-domain-core\|session log]] |
 | M2 | Persistence (SQLAlchemy, Alembic, `SightingBackedPresence`, `region_cell`) | ⬜ not started | — | |
 | M3 | Auth (fastapi-users, JWT) | ⬜ not started | — | |
 | M4 | Sightings + catalogue + rarity wiring | ⬜ not started | — | |

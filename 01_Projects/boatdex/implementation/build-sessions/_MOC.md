@@ -19,7 +19,7 @@ steps. This is the code-side counterpart to the design-side
 <!-- Auto-managed by the impl-doc skill. One line per session:
      - [[YYYY-MM-DDTHHMM--slug|Title]] — one-line summary -->
 
-*No build sessions yet — the first will accompany M0 scaffolding.*
+- [[2026-07-06T1448--m0-m1-domain-core|M0 + M1 domain core]] — M0 scaffold + M1 pure domain core; 142 tests, 100% branch coverage on `src/boatdex/domain/`
 
 ## Parent
 
