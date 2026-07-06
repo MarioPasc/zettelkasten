@@ -38,10 +38,19 @@ resolved — those open questions are the agenda for the product Q&A.
 - [[10-quality-and-ops/_MOC|10 · Quality & ops]] — testing strategy, observability, deployment
 - [[11-roadmap/_MOC|11 · Roadmap]] — milestone plan M0–M9, documentation-generation protocol
 
-## Operational folders
+## Operational folders (design / spec side)
 
-- [[decisions/_MOC|Decisions (ADRs)]] — one MADR-format record per non-obvious choice
-- [[coding-sessions/_MOC|Coding sessions]] — timestamped logs of build sessions
+- [[decisions/_MOC|Decisions (ADRs)]] — MADR records of **design/architecture** choices (what to build)
+- [[coding-sessions/_MOC|Coding sessions]] — logs of **spec/design** sessions in the vault
+
+## Implementation zone (code truth)
+
+*Written by the external coding agent (`github.com/MarioPasc/boatdex`) via its
+`impl-doc` skill; **disentangled** from the spec above — the agent reads the
+spec areas and writes only here, never editing them.*
+
+- [[implementation/_MOC|Implementation MOC]] — the code-truth zone: progress board, build sessions, code decisions, code notes
+- [[implementation/progress|Progress board]] — where the build is (read first when resuming)
 
 ## Parent
 
