@@ -34,16 +34,23 @@ so the schema stores raw `sighting` rows; regional/global counts are computed
 
 ## Planned notes
 
-- [[relational-schema|Relational schema]] — tables `app_user`, `vessel` (MMSI PK; public AIS identity fields only), `region` (`region_id` PK, `name`, `parent_id` self-FK, `level`; the backoff tree), `sighting` (event, **`region_id` NOT NULL** FK, **no stored lat/lon**), `friendship` (canonical undirected edge, `CHECK user_low < user_high`), `notification` (materialised fan-out), `push_token`; indexes and cascade rules
-- [[domain-entities|Domain entities]] — frozen `@dataclass` `Vessel`, `Region`, `Sighting`, `CatalogueEntry` (keyed `(mmsi, region_id)`), `Friendship`; `FriendshipStatus` enum; no I/O, no ORM
-- [[catalogue-derivation|Catalogue derivation]] — `catalogue_entry` view: distinct **`(user, mmsi, region_id)`** with `sighting_count`, `first_seen`, `last_seen`; regional rarity joined at read time via the presence port
+- [[relational-schema|Relational schema]] ✅ *written* — `app_user`, `vessel` (**surrogate UUID PK; MMSI unique-nullable**; `source` manual/ais), `region` (`region_id` TEXT PK, `parent_id` self-FK, `level`, **PostGIS `geom`** for point-in-polygon), `sighting` (**`region_id` NOT NULL**, **no stored lat/lon**, optional `photo_url` + `verified`/`verification`/`observer_distance_m`), `friendship` (canonical edge, `CHECK user_low < user_high`), `notification`, `push_token`; presence counts **computed on demand**
+- [[domain-entities|Domain entities]] — frozen `@dataclass` `Vessel`, `Region`, `Sighting`, `CatalogueEntry` (keyed `(vessel_id, region_id)`), `Friendship`; `FriendshipStatus` enum; no I/O, no ORM
+- [[catalogue-derivation|Catalogue derivation]] — `catalogue_entry` view: distinct **`(user, vessel_id, region_id)`** with `sighting_count`, `first_seen`, `last_seen`; regional rarity joined at read time via the presence port
+
+## Decisions (resolved 2026-07-06 Q&A → see [[relational-schema|Relational schema]])
+
+- ✅ **Vessel key** → surrogate `vessel_id` UUID; MMSI unique-nullable. Catalogue keys `(vessel_id, region_id)`.
+- ✅ **Presence counts** → computed on demand from `sighting`; no `presence_stat` table at MVP (port-hidden cache later).
+- ✅ **Region geo** → polygons stored in **PostGIS** (now a required extension); `lat/lon → region_id` by point-in-polygon at write time; precise coords not stored.
+- ✅ **Proof** → photo-optional + opportunistic proximity check; `photo_url` nullable + `verified`/`verification`/`observer_distance_m` on `sighting`.
 
 ## Open questions (remaining)
 
-- Is MMSI a safe primary key for `vessel` given MMSI reassignment/reuse in the wild? Do we need a surrogate id? (Interacts with `(mmsi, region)` catalogue key.)
-- Cache regional presence counts in a `presence_stat(mmsi, region_id, n)` table for read performance, or compute on demand from `sighting` / AIS each time?
-- Photo storage: URL column only, or a dedicated `sighting_photo` table for multiples?
-- Region tree: store the polygon geometry (for point-in-polygon) in Postgres/PostGIS, or resolve `lat/lon → region_id` in an application service and store only the id?
+- Photo storage: single `photo_url` column vs a `sighting_photo` table for multiples (deferred until it bites).
+- Vessel-position source for the proximity check at manual MVP (no live AIS yet) → resolve in [[../06-features/sightings-and-catalogue|sightings feature]].
+- `region.level` semantics / max depth — fixed by the chosen maritime dataset (IHO / EEZ nesting).
+- GDPR erasure: hard `ON DELETE CASCADE` vs soft-delete for `app_user`.
 
 ## Sources
 

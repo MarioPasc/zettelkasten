@@ -22,6 +22,7 @@ area MOC; this folder tracks *order* and *done-ness*.
 
 ## Planned notes
 
+- [[implementation-sequencing|Implementation sequencing]] ✅ *written* — reuse-driven build order (P0–P10); the two reuse seams (presence port, the single `SightingService.create()` funnel); the prioritised next-spec-files queue
 - [[milestones|Milestones M0–M9 + MA]] — M0 scaffolding · M1 domain core (**R1/R2 rarity, geodesy/identify, FSM** — all pure) · M2 persistence (+ `region` tree) · M3 auth · M4 sightings (**manual capture**; point-in-polygon → region_id; `SightingBackedPresence`→R2) · M8 mobile client (manual loop) · **M9 camera identify — primary fast-follow** (live-AIS bounding-box adapter + device sensors + AR viewfinder) · M5 social graph · M6 notifications · M7 realtime · **MA AIS region-statistics** (→ `AISPresence`→R1, swaps behind the presence port). Two independent AIS integrations: **live bounding-box** (camera, M9) and **historical stats** (rarity R1, MA)
 
 > [!note] Reordered priority (2026-07-05)
