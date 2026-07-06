@@ -26,7 +26,7 @@ change with zero domain rework.
 ## The port (domain interface)
 
 ```python
-RegionId = str      # opaque id of a node in the region tree
+RegionId = str      # opaque region-tree node id (the Marine Regions MRGID)
 MMSI = int          # 9-digit maritime identifier
 
 class RegionalPresence(Protocol):
@@ -63,8 +63,10 @@ when either count source does.
 
 ## Contract (every adapter must satisfy)
 
-Assume the region tree is a **partition** (child regions tile their parent,
-no overlap). Then for all `v`, `r`:
+The region tree is a **partition** (child regions tile their parent, no
+overlap) — **guaranteed by construction** via the [[region-model|H3 region
+model]] (each grid cell maps to exactly one region), not merely assumed. Then
+for all `v`, `r`:
 
 1. All returned counts are `≥ 0`.
 2. `vessel_count(v, r) ≤ region_total(r)`.

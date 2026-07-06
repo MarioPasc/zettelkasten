@@ -22,6 +22,7 @@ picks the tools) by defining how they are used.
 
 ## Planned notes
 
+- [[coding-standards|Coding standards]] ✅ *written* — layering + import-linter contracts, value objects, the exception split, domain purity (Clock injection, no `uuid4`/`now` in domain), config + versioning, naming/docstrings/numerics
 - [[testing-strategy|Testing strategy]] — fast pure-domain unit + hypothesis property tests; application-layer tests with mocked infra; integration tests against disposable Postgres + the API; push adapter contract-tested against Expo/FCM; coverage gates per layer
 - [[observability|Observability]] — structlog structured/JSON logging; no plaintext secrets in logs; key metrics (spot rate, fan-out latency, push delivery, WS connection health); what to alert on
 - [[deployment|Deployment & ops]] — environments, CI (ruff/mypy/pytest/import-linter green as merge gate), migration workflow (Alembic up/down), backups, and the hosting target (to be decided)

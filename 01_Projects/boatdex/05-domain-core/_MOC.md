@@ -37,10 +37,12 @@ decision table in [[../_README|README]].
 
 ## Notes (written)
 
+- [[value-objects|Value objects]] — validating `MMSI` (kind-classified), `IMO` (check-digit), `ShipType` (ITU-R M.1371), `Coordinate`, `RegionId` (MRGID), `Distance`; invalid input → the `ValidationError` family
 - [[regional-presence-port|Regional presence port]] — the `RegionalPresence` Protocol; `AISPresence`→R1 and `SightingBackedPresence`→R2 adapters (both permanent); the contract every adapter satisfies
-- [[rarity-surprisal|Rarity as regional surprisal]] — `R_r(v) = −log₂ p̃_r(v)`; Lidstone base `p̂_r`; Jelinek–Mercer shrinkage `p̃_r = λ_r p̂_r + (1−λ_r) p̃_{parent}`, `λ_r = N_r/(N_r+τ)`; α=1, τ=50; **R1/R2 from one function**; golden values
-- [[collection-score|Collection score]] — `fsum` of **R1** over distinct `(MMSI, region)` entries; set-additive, idempotent on re-sighting
-- [[catalogue-similarity|Catalogue similarity]] — plain Jaccard over `(MMSI, region)` sets; `J(∅,∅)=1` convention; `0 ≤ J ≤ 1`
+- [[region-model|Region model — named regions over an H3 grid]] — collectible/rarity unit = named region (MRGID); H3 is internal plumbing (O(1) resolve, **partition by construction**, no runtime PostGIS)
+- [[rarity-surprisal|Rarity as regional surprisal]] — `R_r(v) = −log₂ p̃_r(v)`; Lidstone base `p̂_r`; Jelinek–Mercer shrinkage `p̃_r = λ_r p̂_r + (1−λ_r) p̃_{parent}`, `λ_r = N_r/(N_r+τ)`; **`RarityConfig(α=1, τ=50, version)`**; **R1/R2 from one function**; golden values
+- [[collection-score|Collection score]] — `fsum` of **R1** over distinct `(vessel, region)` entries; set-additive, idempotent on re-sighting
+- [[catalogue-similarity|Catalogue similarity]] — plain Jaccard over `(vessel, region)` sets; `J(∅,∅)=1` convention; `0 ≤ J ≤ 1`
 - [[geodesy-identify|Geodesy & identify]] — haversine distance, initial bearing, angular diff, `identify_target` (bearing-match the pointed-at vessel); pure, no AIS I/O; golden equator values
 - [[friendship-fsm|Friendship FSM]] — `canonical_pair`; table pending→{accepted,declined,blocked}, accepted→{blocked}, declined→{pending}, blocked terminal; single illegal-move raise site
 - [[domain-exceptions|Domain exceptions]] — `BoatDexError` base + one subclass per invariant (self-friendship, duplicate/absent edge, invalid transition, unknown vessel, unknown region, sighting validation)
@@ -55,11 +57,14 @@ decision table in [[../_README|README]].
 - `canonical_pair` order-invariant; self-pair raises.
 - FSM: exactly table-listed transitions succeed; all others raise `InvalidTransitionError`.
 
+## Resolved (2026-07-06 Q&A → to become ADRs at M1 close-out)
+
+- ✅ **Value objects** over primitives ([[value-objects]]); ✅ **exception split** — domain hierarchy for business rules vs builtin `ValueError` for precondition bugs ([[domain-exceptions]]); ✅ region unit = **named region (MRGID)** over an **H3** grid substrate ([[region-model]]); ✅ **`RarityConfig`** (α, τ injectable) + a `version` stamp on persisted scores. Contract in [[../10-quality-and-ops/coding-standards|coding standards]].
+
 ## Open questions (remaining, smaller)
 
-- Promote `α` (=1.0) and `τ` (=50) from module constants to per-deployment config once AIS data volume is known?
 - Add an **unblock** transition (`blocked → pending`), or keep `blocked` terminal in v1?
-- Region-tree depth/source: which Marine Regions / IHO / EEZ dataset, and how many nesting levels the backoff climbs — a data-artefact decision for the [[../02-architecture/_MOC|AIS region-statistics module]].
+- H3 **base resolution** (res 4; res 5 for micro-EEZs) and how many named-region levels the backoff climbs — a versioned `RegionConfig` / data-artefact decision ([[region-model]]).
 
 ## Sources (citations)
 

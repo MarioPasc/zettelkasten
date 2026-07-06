@@ -42,7 +42,7 @@ so the schema stores raw `sighting` rows; regional/global counts are computed
 
 - ✅ **Vessel key** → surrogate `vessel_id` UUID; MMSI unique-nullable. Catalogue keys `(vessel_id, region_id)`.
 - ✅ **Presence counts** → computed on demand from `sighting`; no `presence_stat` table at MVP (port-hidden cache later).
-- ✅ **Region geo** → polygons stored in **PostGIS** (now a required extension); `lat/lon → region_id` by point-in-polygon at write time; precise coords not stored.
+- ✅ **Region geo** → named regions (**MRGID**) resolved at runtime via an **H3** cell → `region_cell` lookup (no live PostGIS); polygons rasterised **offline** (PostGIS/shapely). See [[../05-domain-core/region-model|region model]].
 - ✅ **Proof** → photo-optional + opportunistic proximity check; `photo_url` nullable + `verified`/`verification`/`observer_distance_m` on `sighting`.
 
 ## Open questions (remaining)

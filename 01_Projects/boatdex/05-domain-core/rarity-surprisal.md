@@ -36,8 +36,9 @@ providers yields the product's two rarities.
 | Role | **feeds the collection score** ([[collection-score]]) | shown **badge**, not summed |
 | Endogenous? | no (real-world) | yes (grows with app usage) |
 
-Both call the identical `rarity(provider, mmsi, region)` below — only the
-injected provider differs. `R1` before the AIS module ships uses the
+Both call the identical `rarity(provider, mmsi, region, config)` below — only
+the injected provider differs (`config` is the shared `RarityConfig`). `R1`
+before the AIS module ships uses the
 sighting-backed provider as a temporary stand-in; `R2` uses it permanently.
 
 ## Definition
@@ -74,15 +75,19 @@ p̃_global(v) = (n_{v,global} + α) / (N_global + α·V_global)     # base case
 as `N_r → ∞` (rich region ⇒ trust local). `τ` is a shrinkage pseudo-count: at
 `N_r = τ` the local estimate and the parent estimate carry equal weight.
 
-## Parameters (fixed for v1)
+## Parameters — `RarityConfig`
 
-| Symbol | Meaning | v1 value | Rationale |
-|--------|---------|----------|-----------|
+| Symbol | Meaning | default | Rationale |
+|--------|---------|---------|-----------|
 | `α` | Lidstone smoothing | `1.0` (Laplace) | Standard uninformative prior; keeps `p̂ ∈ (0,1)`. |
 | `τ` | shrinkage pseudo-count | `50` | Region needs ~50 observations to half-trust its own rate; tune once AIS data volume is known. |
 
-Both are module constants for v1, not per-request tunable. Promoting them to
-config is deferred (see open questions in [[_MOC|Domain-core MOC]]).
+Decision (2026-07-06): `α` and `τ` are passed as an injectable
+**`RarityConfig(alpha=1.0, tau=50.0, version=...)`** value object — never module
+globals or an `os.environ` read inside the domain. Any **persisted** score or
+leaderboard stores `RarityConfig.version`, so a retune, or the R1 provider swap
+(sighting-backed → AIS at MA), stays reproducible and historical scores remain
+interpretable. See [[../10-quality-and-ops/coding-standards|coding standards §5]].
 
 ## Invariants
 
@@ -132,7 +137,8 @@ Derivation of row 1: `p̃_global = 5/1200 = 0.00416667`; `p̂_r = 3/28 = 0.10714
 
 - Not the collection score (that sums rarities: [[collection-score]]).
 - Not the count source (that is the [[regional-presence-port|port]]).
-- Not the region tree construction (a data artefact, loaded by infra).
+- Not the region tree construction — a partition **guaranteed by construction**
+  via the [[region-model|H3 region model]], built offline and loaded by infra.
 
 #type/concept #status/active #domain/information-retrieval #project/boatdex
 

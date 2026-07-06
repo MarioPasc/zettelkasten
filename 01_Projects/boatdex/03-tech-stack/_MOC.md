@@ -22,7 +22,7 @@ coherent group of choices, each ending in a proposed ADR.
 
 ## Planned notes
 
-- [[backend-framework|Backend framework]] — FastAPI (async, Pydantic, OpenAPI) · SQLAlchemy 2.0 typed `Mapped[...]` · PostgreSQL (+PostGIS optional) · Alembic migrations
+- [[backend-framework|Backend framework]] — FastAPI (async, Pydantic, OpenAPI) · SQLAlchemy 2.0 typed `Mapped[...]` · PostgreSQL · Alembic migrations · **h3-py** (Apache-2.0; runtime `lat/lon → region`) · **PostGIS + shapely offline-only** (region rasterisation, see [[../05-domain-core/region-model|region model]])
 - [[auth-and-security|Auth & security]] — fastapi-users, Argon2id password hashing, JWT access/refresh; "auth is the wrong place to be original"
 - [[async-realtime-push|Async, realtime & push]] — arq (Redis) task queue (Celery fallback) · WebSocket/SSE live feed · Expo Push / FCM / APNs
 - [[client-stack|Client stack]] — Expo / React Native; cross-platform; **camera capture is a primary fast-follow** so the client needs device **GPS** (`expo-location`), **compass/orientation** (`expo-sensors` magnetometer), and a **camera + 2D AR overlay** (label vessels by screen-projected bearing). No depth-AR / LiDAR — distance is AIS-derived

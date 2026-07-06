@@ -24,11 +24,13 @@ derivation]].
 
 ## Resolved decisions (2026-07-06 Q&A → future ADRs)
 
-1. **Region model = open maritime dataset (hierarchical polygons).** Named
-   seas / EEZ zones (Marine Regions / IHO) nested to a global root.
-   `lat/lon → region_id` by **point-in-polygon at write time** ⇒ **PostGIS is
-   now a required dependency** (previously "optional"). Precise coordinates are
-   a **transient input**, not stored (privacy: coarsen-to-region).
+1. **Region model = named regions (MRGID) over an H3 grid.** Rarity/collectible
+   unit = a named sea/EEZ from Marine Regions (**MRGID** as `region_id`). At
+   runtime `lat/lon → H3 cell` (arithmetic) → a `region_cell` lookup →
+   `region_id` — **no PostGIS at request time**. PostGIS/shapely rasterise the
+   polygons **offline** into `region_cell` (centroid containment ⇒ a guaranteed
+   partition). Precise coordinates are a **transient input**, not stored. See
+   [[../05-domain-core/region-model|region model]].
 2. **Proof = photo-optional + opportunistic proximity check.** A sighting
    counts with no photo. At write time, if the vessel's position is known, the
    server computes the observer→vessel great-circle distance
@@ -50,8 +52,9 @@ the AIS auto-registry arrives with the region-statistics module (MA).
 ## DDL sketch
 
 ```sql
-CREATE EXTENSION IF NOT EXISTS postgis;   -- region polygons + point-in-polygon
 CREATE EXTENSION IF NOT EXISTS citext;    -- case-insensitive email
+-- PostGIS is NOT a runtime dependency: region resolution is H3 + the region_cell
+-- lookup below. PostGIS/shapely are used only in the OFFLINE region build.
 
 -- Users (profile view; fastapi-users owns auth columns).
 CREATE TABLE app_user (
@@ -62,18 +65,24 @@ CREATE TABLE app_user (
     is_active     BOOLEAN NOT NULL DEFAULT true
 );
 
--- Hierarchical named-region tree (loaded from the maritime dataset).
--- region_id is an opaque string (RegionId in the presence port), e.g. 'iho:28'.
+-- Hierarchical named-region tree (Marine Regions; region_id = MRGID).
 CREATE TABLE region (
-    region_id   TEXT PRIMARY KEY,
+    region_id   TEXT PRIMARY KEY,                        -- MRGID, e.g. 'mrgid:2350'
     name        TEXT NOT NULL,
     parent_id   TEXT REFERENCES region(region_id),      -- NULL only at global root
     level       INT  NOT NULL,                           -- 0 = root, grows downward
-    geom        GEOGRAPHY(MULTIPOLYGON, 4326) NOT NULL,  -- for ST_Covers point-in-polygon
-    source_ref  TEXT                                     -- dataset provenance
+    source_ref  TEXT                                     -- dataset provenance (VLIZ / IHO)
 );
-CREATE INDEX ix_region_geom   ON region USING GIST (geom);
 CREATE INDEX ix_region_parent ON region (parent_id);
+
+-- H3 cell -> region lookup, built OFFLINE by rasterising region polygons
+-- (centroid containment ⇒ each cell falls in exactly one region). Runtime
+-- region resolution is a single-row lookup; no polygon geometry is queried live.
+CREATE TABLE region_cell (
+    h3_cell    BIGINT PRIMARY KEY,                       -- H3 res-4 (res-5 for micro-EEZs)
+    region_id  TEXT NOT NULL REFERENCES region(region_id)
+);
+CREATE INDEX ix_region_cell_region ON region_cell (region_id);
 
 -- Vessels — surrogate PK; MMSI unique-but-nullable; manually introduced for now.
 CREATE TABLE vessel (
@@ -163,8 +172,8 @@ Rarity (R1/R2) is joined at read time from the presence port, keyed
 ## Write-time data flow for a manual sighting
 
 `client sends {vessel_id | new-vessel fields, lat, lon, spotted_at, photo?}`
-→ **resolve region**: `ST_Covers(region.geom, point(lon,lat))`, pick the
-deepest matching node → `region_id` → **optional proximity check**: if a vessel
+→ **resolve region**: `h3.latlng_to_cell(lat, lon, 4)` → `region_cell` lookup
+→ `region_id` (no live PostGIS) → **optional proximity check**: if a vessel
 position is available, haversine(observer, vessel) → set `verified`,
 `verification`, `observer_distance_m` → **persist** `sighting` (no lat/lon) →
 emit `SightingCreated`. Precise coordinates never touch disk.

@@ -31,7 +31,8 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID
 
-RegionId = str   # opaque node id in the region tree (matches the presence port)
+from .value_objects import IMO, MMSI, RegionId, ShipType  # validating value objects
+# RegionId is the Marine Regions MRGID (see 05-domain-core/region-model).
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,10 +50,10 @@ class Vessel:
     """A vessel by public identity only. Surrogate id; MMSI may be unknown."""
 
     vessel_id: UUID
-    mmsi: int | None             # 9-digit; None for a manually-introduced boat
-    imo: int | None
+    mmsi: MMSI | None             # validated + kind-classified; None if unknown
+    imo: IMO | None               # validated check digit; None for small craft
     name: str | None
-    ship_type: str | None
+    ship_type: ShipType | None    # ITU-R M.1371 code + category; a soft signal
     flag: str | None
     # Invariant (mirrors the DDL CHECK): mmsi is not None or name is not None.
 
@@ -119,6 +120,7 @@ class Friendship:
 ## Related
 
 - [[_MOC|Data-model MOC]]
+- [[../05-domain-core/value-objects|Value objects]] — the validated field types (`MMSI`, `IMO`, `ShipType`, `RegionId`)
 - [[relational-schema|Relational schema]] — the tables these mirror
 - [[catalogue-derivation|Catalogue derivation]] — how `CatalogueEntry` is built
 - [[../05-domain-core/rarity-surprisal|Rarity as regional surprisal]] — `rarity_bits`
